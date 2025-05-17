@@ -1,0 +1,238 @@
+<!doctype html>
+<html>
+ <head>
+  <title>sexuality test</title>
+  <style type="text/css">
+   body { font-size: 20px; font-family: "Georgia"; }
+   .qdiv { margin: 1em; }
+   h3 { margin: 1em; }
+   p { margin: 1em; }
+   .q { margin: 0.1em 0em; }
+   #results { width: 100%; }
+   #submit { margin: 1em; }
+   #wrapper { width: min(100%,50em); margin: 1em auto; border: 1px solid black; }
+   #canvas { display: block; border: 0.1em solid black; margin: 2em auto; }
+   .radio { height: 1.3333em; width: 1.5em; }
+  </style>
+ </head>
+ <body>
+
+  <div id="wrapper">
+
+   <form id="form" onsubmit="return (function(){ submit_results(); return false; })()">
+   </form>
+
+   <div id="results">
+    <!-- <canvas id="canvas"></canvas> -->
+   </div>
+
+   <script>
+
+var questions = [
+  'I have fantasized about dating {P}.',
+  'I have dated a {S}.',
+  'I have dated a {S} for more than a year.',
+  'I have fantasized about kissing or making out with a {S}.',
+  'I have kissed or made out with a {S}.',
+  'I have fantasized about holding hands, cuddling, or other physical expressions of affection with {P}.',
+  'I have held hands, cuddled, or engaged in other physical expressions of affection with {P}.',
+  'I have fantasized about sex with {P}.',
+  'I have masturbated to sexual fantasies involving {P}.',
+  'I have had sex with a {S} (any sexual activity).',
+  'I have had penetrative sex with a {S} (vaginal/anal).',
+  'I had crushes on {P} before the onset of puberty.',
+  'I had crushes on {P} during adolescence.',
+  'I have had crushes on {P} as an adult.',
+  'I have had more than 1 {A} partner.',
+  'I have had more than 2 {A} partners.',
+  'I have had more than 5 {A} partners.',
+  'I would consider a {S} as a potential marriage partner.',
+  'I am married or engaged to a {S}, or was married / engaged to one in the past.',
+  'I consider myself to be attracted to {P}.'
+];
+
+var PS = ['men','women'];
+var SS = ['man','woman'];
+var AS = ['male','female'];
+
+function sub(q,i) {
+  return q.replace('{P}', PS[i]).replace('{S}', SS[i]).replace('{A}', AS[i]);
+};
+
+function make_html(q,i,k) {
+  return `<div class="q">${k}.${i}.&nbsp;&nbsp;${q}</div>` +
+   `<input type="radio" class="radio" name="q${k}.${i}" id="q${k}.${i}y" /> <label for="q${k}.${i}y">Yes</label>` +
+   "&nbsp;&nbsp;" +
+   `<input type="radio" class="radio" name="q${k}.${i}" id="q${k}.${i}n" /> <label for="q${k}.${i}n">No</label>`;
+}
+
+/* init */
+for (var k = 0; k < 2; k++) {
+  var hdr = document.createElement("h3");
+  var g = (k == 0) ? 'Androphilia' : 'Gynephilia';
+  hdr.innerHTML = `Section ${k+1} - ${g}`;
+  document.getElementById("form").append(hdr);
+
+  for (var i = 0; i < questions.length; i++) {
+    var q = questions[i];
+    var q2 = sub(q,k);
+    var code = make_html(q2,i+1,k+1);
+
+    var elem = document.createElement("div");
+    elem.className = 'qdiv';
+    elem.innerHTML = code;
+    document.getElementById("form").append(elem);
+  }
+
+  var hr = document.createElement("hr");
+  document.getElementById("form").append(hr);
+
+}
+
+var res = document.createElement("input");
+res.type = "submit";
+res.id = "submit";
+document.getElementById("form").append(res);
+
+const qdrts = [
+  ['Asexual / inexperienced', 'Marginal Androphile', 'Androphile'],
+  ['Marginal Gynephile', 'Marginal Bisexual', 'Androphilic bisexual'],
+  ['Gynephile', 'Gynephilic bisexual', 'True bisexual']
+];
+
+DEBUG = false;
+function submit_results() {
+  var sets = [];
+  var missing = [];
+  for (var i = 1; i <= 2; i++) {
+    var set = [];
+    for (var j = 1; j <= questions.length; j++) {
+      var id_y = 'q' + i + '.' + j + 'y';
+      var id_n = 'q' + i + '.' + j + 'n';
+      var yes = document.getElementById(id_y).checked;
+      var no = document.getElementById(id_n).checked;
+      if (!yes && !no) {
+        if (DEBUG) {
+          set.push(false);
+        } else {
+          missing.push(i + '.' + j);
+        }
+      } else {
+        set.push(yes ? true : false);
+      }
+    }
+    sets.push(set);
+  }
+
+  var results = document.getElementById('results');
+  results.innerHTML = '';
+
+  if (!DEBUG && missing.length > 0) {
+    var p = document.createElement('p');
+    p.innerHTML = 'Could not submit, missing answers:<br />';
+    p.innerHTML += missing[0];
+    for (var i = 1; i < missing.length; i++) {
+      p.innerHTML += ', ' + missing[i];
+    }
+    results.append(p);
+    results.scrollIntoView();
+  } else {
+    var setM = sets[0];
+    var setF = sets[1];
+    var scoreM = setM.reduce((x,y) => x+y);
+    var scoreF = setF.reduce((x,y) => x+y);
+    var total = questions.length;
+    var prtnM = scoreM / total;
+    var prtnF = scoreF / total;
+    var pcntM = (prtnM * 100).toFixed(1) + '%';
+    var pcntF = (prtnF * 100).toFixed(1) + '%';
+
+    var pm = document.createElement('p');
+    pm.innerHTML = `<b>Androphilia</b>: ${scoreM}/${total} = ${pcntM}`
+    results.append(pm);
+    var pf = document.createElement('p');
+    pf.innerHTML = `<b>Gynephilia</b>: ${scoreF}/${total} = ${pcntF}`
+    results.append(pf);
+
+    var qdrt_y = Math.min(2, Math.floor(prtnM * 100 / 33.333));
+    var qdrt_x = Math.min(2, Math.floor(prtnF * 100 / 33.333));
+    var qdrt = qdrts[qdrt_x][qdrt_y];
+    var qe = document.createElement('p');
+    qe.innerHTML = `<b>Classification</b> (tentative): ${qdrt}`;
+    results.append(qe);
+
+    var cnv = document.createElement('canvas');
+    cnv.id = 'canvas';
+    var ctx = cnv.getContext("2d");
+    ctx.canvas.width = 400;
+    ctx.canvas.height = 400;
+    var pad = 25;
+
+    ctx.fillStyle = '#aaa';
+    ctx.beginPath();
+    ctx.moveTo(pad,pad);
+    ctx.lineTo(pad, ctx.canvas.height - pad);
+    ctx.moveTo(ctx.canvas.width - pad, pad);
+    ctx.lineTo(ctx.canvas.width - pad, ctx.canvas.height - pad);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(pad, pad);
+    ctx.lineTo(ctx.canvas.width - pad, pad);
+    ctx.moveTo(pad, ctx.canvas.height - pad);
+    ctx.lineTo(ctx.canvas.width - pad, ctx.canvas.height - pad);
+    ctx.closePath();
+    ctx.stroke();
+
+    var wd = ctx.canvas.width - 2*pad;
+    var ht = ctx.canvas.height - 2*pad;
+
+    ctx.beginPath();
+    ctx.moveTo(pad + wd / 3, pad);
+    ctx.lineTo(pad + wd / 3, pad + ht);
+    ctx.moveTo(pad + 2*wd / 3, pad);
+    ctx.lineTo(pad + 2*wd / 3, pad + ht);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(pad, pad + ht / 3);
+    ctx.lineTo(pad + wd, pad + ht / 3);
+    ctx.moveTo(pad, pad + 2*ht / 3);
+    ctx.lineTo(pad + wd, pad + 2*ht / 3);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.font = "16px Arial";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "black";
+    ctx.fillText("Androphilia score", pad + wd/2, ctx.canvas.height - pad/2 + 2);
+    ctx.fillText(questions.length, ctx.canvas.width - pad, ctx.canvas.height - pad/2 + 2);
+    ctx.fillText(questions.length, pad/2 + 1, pad/2 + 3);
+    ctx.fillText("0", pad/2, ctx.canvas.height - pad/2 + 2);
+
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText("Gynephilia score", -(pad + ht / 2), pad/2);
+    ctx.restore();
+
+    var pt_x = prtnM * wd;
+    var pt_y = ht - prtnF * ht;
+    var thk = 5;
+    ctx.fillStyle = 'red';
+    ctx.arc(pad + pt_x, pad + pt_y, thk, 0, 2*Math.PI, 0);
+    ctx.fill();
+    results.append(cnv);
+
+    results.scrollIntoView();
+  }
+}
+
+   </script>
+
+  </div>
+
+ </body>
+</html>
