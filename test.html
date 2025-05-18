@@ -6,6 +6,7 @@
    body { font-size: 20px; font-family: "Georgia"; }
    .qdiv { margin: 1em; }
    h3 { margin: 1em; }
+   h4 { margin: 1em; }
    p { margin: 1em; }
    .q { margin: 0.1em 0em; }
    #results { width: 100%; }
@@ -19,7 +20,9 @@
 
   <div id="wrapper">
 
-   <p>NB: "man/male" and "woman/female" refer to the perceived gender of a partner, not necessarily their biological sex. For ambiguous cases, use your best judgment.</p>
+   <h3>Androphilia / Gynephilia test</h3>
+   <p>Note: "man/male" and "woman/female" refer to the perceived gender of a partner, not necessarily their biological sex. For ambiguous cases, use your best judgment.</p>
+   <hr />
    <form id="form" onsubmit="return (function(){ submit_results(); return false; })()">
    </form>
 
@@ -69,7 +72,7 @@ function make_html(q,i,k) {
 
 /* init */
 for (var k = 0; k < 2; k++) {
-  var hdr = document.createElement("h3");
+  var hdr = document.createElement("h4");
   var g = (k == 0) ? 'Androphilia' : 'Gynephilia';
   hdr.innerHTML = `Section ${k+1} - ${g}`;
   document.getElementById("form").append(hdr);
