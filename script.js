@@ -170,8 +170,6 @@ let c2_ih = c2.innerHTML;
 let abm = `
 <h3>About me</h3>
 <hr />
-<p>ts pmo sm fr omfg sybau</p>
-<br />
 <p>click the links on the sidebar to view projects</p>
 `;
 
