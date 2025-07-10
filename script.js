@@ -144,9 +144,7 @@ c1.append(c1_ssDiv);
 c1.innerHTML += `
 <h3>Demo</h3>
 <hr />
-<p>
- <iframe class="inBox" width="560" height="315" src="https://www.youtube.com/embed/m-mEatopVb8?si=m-34kWrBZL-_gr97" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</p>
+<iframe class="inBox" width="560" height="315" src="https://www.youtube.com/embed/m-mEatopVb8?si=m-34kWrBZL-_gr97" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 `;
 
 let c1_ih = c1.innerHTML;
@@ -162,7 +160,10 @@ ftvt is a tool for visualizing Fourier transforms in one dimension. Signals are 
 <h3>Technical challenges</h3>
 <hr />
 <h4>Parsing expressions</h4>
-<h4>Deforesting the FFT algorithm</h4>
+<h4>Implementing FFT</h4>
+<h3>Demo</h3>
+<hr />
+<iframe class="inBox" width="560" height="315" src="https://www.youtube.com/embed/yvKetX5DXBc?si=BhuVZoEzjUXOsFkt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 `;
 
 let c2_ih = c2.innerHTML;
