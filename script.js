@@ -174,19 +174,19 @@ let abm = `
 `;
 
 let projects = [
-  {"name": "rjx byteburner", "color": "rgb(85,255,187)", "content": c1_ih, "internal": true},
-  {"name": "ftvt", "color": "rgb(255,187,85)", "content": c2_ih, "internal": true},
-  {"name": "xx", "color": "rgb(136,170,255)", "internal": true}, // 85, 255, 187
-  {"name": "Project 4", "color": "rgb(255,85,187)", "content": '[[Hyperlink blocked]]', "internal": true}
+  {"name": "rjx byteburner", "color": "rgb(230,57,115)", "content": c1_ih, "internal": true},
+  {"name": "ftvt", "color": "rgb(230,129,57)", "content": c2_ih, "internal": true},
+  {"name": "xx", "color": "rgb(200,230,57)", "internal": true}, // 85, 255, 187
+  {"name": "Project 4", "color": "rgb(72,230,57)", "content": '[[Hyperlink blocked]]', "internal": true}
 ];
 
 addList('projects', projects, true);
 
 let boring = [
-  {"name": "About me", "color": "rgb(255,85,187)", "content": abm, "internal": true},
-  {"name": "Resume", "color": "rgb(85,255,187)", "internal": true},
-  {"name": "Github", "color": "rgb(255,187,85)", "internal": false},
-  {"name": "LinkedIn 🤮", "color": "rgb(136,170,255)", "internal": false}
+  {"name": "About me", "color": "rgb(57,230,172)", "content": abm, "internal": true},
+  {"name": "Resume", "color": "rgb(57,157,230)", "internal": true},
+  {"name": "Github", "color": "rgb(86,57,230)", "internal": false},
+  {"name": "LinkedIn 🤮", "color": "rgb(215,57,230)", "internal": false}
 ];
 
 addList('boring', boring, false);
