@@ -59,7 +59,7 @@ let addList = function(id, xs) {
     } else {
       let a = document.createElement('a');
       a.innerHTML = name;
-      a.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+      a.href = row["link"];
       a.classList.add("link");
       li.append(a);
     }
@@ -174,19 +174,19 @@ let abm = `
 `;
 
 let projects = [
-  {"name": "rjx byteburner", "color": "rgb(230,57,115)", "content": c1_ih, "internal": true},
-  {"name": "ftvt", "color": "rgb(230,129,57)", "content": c2_ih, "internal": true},
-  {"name": "xx", "color": "rgb(200,230,57)", "internal": true}, // 85, 255, 187
-  {"name": "Project 4", "color": "rgb(72,230,57)", "content": '[[Hyperlink blocked]]', "internal": true}
+  {"name": "rjx byteburner", "color": "#ff4080", "content": c1_ih, "internal": true},
+  {"name": "ftvt", "color": "#ff8f40", "content": c2_ih, "internal": true},
+  {"name": "xx", "color": "#dfff40", "internal": true}, // 85, 255, 187
+  {"name": "Project 4", "color": "#50ff40", "content": '[[Hyperlink blocked]]', "internal": true}
 ];
 
 addList('projects', projects, true);
 
 let boring = [
-  {"name": "About me", "color": "rgb(57,230,172)", "content": abm, "internal": true},
-  {"name": "Resume", "color": "rgb(57,157,230)", "internal": true},
-  {"name": "Github", "color": "rgb(86,57,230)", "internal": false},
-  {"name": "LinkedIn 🤮", "color": "rgb(215,57,230)", "internal": false}
+  {"name": "About me", "color": "#40ffbf", "content": abm, "internal": true},
+  {"name": "Resume", "color": "#40afff", "internal": true},
+  {"name": "Github", "color": "#6040ff", "internal": false, "link": "https://github.com/winterlilies"},
+  {"name": "LinkedIn 🤮", "color": "#ef40ff", "internal": false, "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}
 ];
 
 addList('boring', boring, false);
