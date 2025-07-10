@@ -112,7 +112,7 @@ typedef struct {
   uint64_t key, val;
 } hmap_entry_tx;
 </pre>
-<p>The bulk of the work involved in the implementation of was creating a set of routines for accessing the data structure and automating its memory allocation. My personal convention for implementing data structures in C is to create standard constructor and destructor patterns for managing the lifetime of the object, so the responsibility falls on the calling routine to know when the object is no longer needed, although in other respects the process is automated, and destructors can recursively call other destructors to simplify the cleanup process. The library also takes care of resizing the hash table once a certain load factor has been reached and rehashing automatically.</p>
+<p>The bulk of the work involved creating a set of routines for accessing the data structure and automating its memory allocation. My personal convention for implementing data structures in C is to create standard constructor and destructor patterns for managing the lifetime of the object, so the responsibility falls on the calling routine to know when the object is no longer needed, although in other respects the process is automated, and destructors can recursively call other destructors to simplify the cleanup process. The library also takes care of resizing the hash table once a certain load factor has been reached and rehashing automatically.</p>
 <pre class="code inBox">
 static void hmap_init(hmap_tx *h, int bkts) {
   int bytes = BYTES_PER_BKT * bkts;
