@@ -1,0 +1,240 @@
+@font-face {
+  font-family: "RedHatText";
+  src:
+    local("RedHatText"),
+    url("fonts/RedHatText-VariableFont_wght.ttf") format("truetype")
+}
+
+@font-face {
+  font-familiy: "Inconsolata";
+  src:
+    local("Inconsolata"),
+    url("fonts/Inconsolata-VariableFont_wdth,wght.ttf") format("truetype")
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.box {
+  font-family: "RedHatText", "sans-serif";
+  margin: 1vh;
+  background-color: rgba(0, 0, 0, 0.6); // 0.7 if other image
+  border: 0.1vh solid #222;
+  backdrop-filter: blur(8px);
+  border-radius: 1.2vh;
+  height: 100%;
+  box-shadow: max(6px, 0.6vh) max(6px, 0.6vh) max(6px, 0.6vh) rgba(0, 0, 0, 0.9);
+  height: 100%;
+  min-height: 0; /* fucking */
+  overflow: hidden;
+}
+
+.boxtop {
+  /*background-color: rgb(255, 255, 255, 0.25);*/
+  border-radius: 1.2vh 1.2vh 0vh 0vh;
+  padding-top: 1vh;
+  padding-right: 1.75vh;
+  padding-bottom: 1vh;
+  padding-left: 1.75vh;
+}
+
+.boxbottom {
+  font-size: max(18px, 1.8vh);
+  border-radius: 0vh 0vh 1.2vh 1.2vh;
+  padding-top: 1.5vh;
+  padding-right: 2vh;
+  padding-bottom: 6vh;
+  padding-left: 2vh;
+  height: 100%;
+  overflow: scroll;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  /*border: 1px solid blue;*/
+  width: 120vh;
+  margin: 0 auto 0 auto;
+}
+
+.main {
+  display: flex;
+  flex-direction: row;
+  height: 98vh;
+}
+
+/*.edit {
+  background-color: rgba(0, 0, 0, 0.0);
+  width: 100%;
+  height: 100%;
+  color: white;
+  font-family: monospace;
+  font-size: 2.4vh;
+  border: none;
+}*/
+
+body {
+  background: url("bg.jpg");
+  background-size: cover;
+  color: white;
+  font-family: sans-serif;
+  font-size: max(20px, 2vh);
+}
+
+ul.bufferList, ul#rooms, ul.lstn {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.edit:focus {
+  outline: none;
+}
+
+html {
+  height: 100%;
+}
+
+select, button {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.8vh;
+  border: none;
+  font-size: max(18px, 1.8vh);
+  border-radius: 0.8vh;
+}
+
+p {
+  margin: 0.1vh;
+}
+
+form#messageForm {
+  width: 100%;
+  position: absolute;
+  bottom: 0.5vh;
+}
+
+form input#m {
+  font-size: max(18px, 1.8vh);
+  color: #eee;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  padding: 0.1vh;
+  width: 93%;
+  border-radius: 0.8vh;
+}
+
+div#typingDisplay {
+  color: #ccc;
+  font-size: 0.75em;
+  margin-bottom: 0.1vh;
+}
+
+div#chat {
+  height: 100%;
+  overflow-y: hidden;
+}
+
+.list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+  overflow-y: scroll;
+  overflow-x: visible;
+  overflow-wrap: break-word;
+}
+
+#messages {
+  height: 82.5%;
+}
+
+#activityDiv {
+  height: 100%;
+}
+
+#activity {
+  height: 85%;
+  font-size: 0.9em;
+}
+
+#messages li { padding: 0.1em 0em; }
+
+#usersOnline {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#usersOnline li { padding: 0.1em 0em; }
+
+li.room {
+  padding: 0.50vh;
+  border-radius: 0.75vh;
+  cursor: pointer;
+}
+
+.room {
+  border: 0.1vh solid transparent;
+}
+
+/*.activeRoom {
+  border: 1px solid #888;
+}*/
+
+#roomTitleWrapper {
+  padding: 0.5vh;
+  background-color: #111;
+  border-radius: 0.75vh;
+}
+
+a.link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  text-decoration: inherit;
+}
+
+h3 {
+  margin: 1.5vh 0 1.5vh 0;
+}
+
+h4 {
+  margin: 1vh 0 1vh 0;
+}
+
+.imgDiv {
+  margin: 1vh auto 1vh auto;
+}
+
+.inBox {
+  padding: 1.5vh;
+  border-radius: 0.75vh;
+  background-color: rgba(48,48,48,0.75);
+  box-shadow: max(6px, 0.6vh) max(6px, 0.6vh) max(6px, 0.6vh) rgba(0, 0, 0, 0.9);
+  border: 0.1vh solid #484848;
+  margin: 2.0vh auto 2.0vh auto;
+}
+
+img.ss {
+  display: block;
+  width: 95%;
+}
+
+.code {
+  font-family: "Inconsolata", Monospace;
+  width: 95%;
+}
+
+iframe {
+  display: block;
+}
