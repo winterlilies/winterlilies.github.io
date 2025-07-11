@@ -70,10 +70,10 @@ let addList = function(id, xs) {
 
 let c1 = document.createElement('div');
 c1.innerHTML = `
-<h3>rjx byteburner</h3>
+<h3>rjx (byteburner)</h3>
 <hr />
 <p>
- rjx byteburner is a realtime logic circuit simulator. It allows for fine control over the simulation timeline, including the ability to go frame by frame and to run the simulation in reverse. There is a small set of basic components including basic logic gates, button/switch inputs, and several kinds of seven-segment style displays. The GUI is minimal and much of the functionality is accessed through predetermined keybinds.
+rjx is a realtime logic circuit simulator. It allows for fine control over the simulation timeline, including the ability to go frame by frame and to run the simulation in reverse. There is a small set of basic components including basic logic gates, button/switch inputs, and several kinds of seven-segment style displays. The GUI is minimal and much of the functionality is accessed through predetermined keybinds.
 </p>
 <br />
 <p><b>Note</b>: rjx does not simulate real life digital circuits. It should be considered more of an educational or hobbyist application for the exploration of constructing abstract machines from a simple set of logical components.</p>
@@ -175,7 +175,7 @@ let abm = `
 `;
 
 let projects = [
-  {"name": "rjx byteburner", "color": "#ff4080", "content": c1_ih, "internal": true},
+  {"name": "rjx", "color": "#ff4080", "content": c1_ih, "internal": true},
   {"name": "ftvt", "color": "#ff8f40", "content": c2_ih, "internal": true},
   {"name": "xx", "color": "#dfff40", "internal": true}, // 85, 255, 187
   {"name": "Project 4", "color": "#50ff40", "content": '[[Hyperlink blocked]]', "internal": true}
