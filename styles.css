@@ -204,6 +204,11 @@ a.link {
   text-decoration: inherit;
 }
 
+a.nft {
+  color: inherit;
+  text-decoration: inherit;
+}
+
 h3 {
   margin: 1.5vh 0 1.5vh 0;
 }
@@ -237,4 +242,21 @@ img.ss {
 
 iframe {
   display: block;
+}
+
+#tryFtvt {
+  margin: 0 auto 0 auto;
+  font-size: 2vh;
+  border: 0.1vh solid rgb(255, 64, 128);
+  border-radius: 0.5vh;
+  padding: 0.5vh;
+  color: rgb(255, 64, 128);
+}
+#tryFtvt:hover {
+  border-style: dashed;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+#tryFtvtDiv {
+  text-align: center;
 }

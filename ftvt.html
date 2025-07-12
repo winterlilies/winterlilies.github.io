@@ -1,0 +1,3944 @@
+<!doctype html>
+<!-- https://stackoverflow.com/questions/5351634/css-side-by-side-divs-auto-equal-widths#5353082 -->
+<html>
+ <head>
+  <meta charset="utf-8" />
+  <title>ftvt</title>
+  <style type="text/css">
+   * { margin: 0; padding: 0; box-sizing: border-box; }
+   body { font: 18px Arial, sans-serif; background-color: black; color: #ccc; }
+   #wrapper { max-width: 80%; margin: 0 auto; border: 2px #555 solid; }
+   #plotwrapper { display: table; table-layout: fixed; width: 100%; margin: 0 auto; }
+   .plotdiv { border: 1px #555 solid; display: table-cell; background-color: #555; }
+   .plot { border: 0px; display: block; margin: 0 auto; width: 100%; }
+   #plot1 { background-color: #000; }
+   #plot2 { background-color: #000; }
+   #title { padding: 0.5em; }
+   .formWrapper { padding: 0.5em; }
+   .formWrapper input { background-color: #000; color: #ccc; font: 18px Arial, sans-serif; }
+   .formWrapper select { background-color: #000; color: #ccc; font: 18px Arial, sans-serif; }
+   .short { width: 4.25em; }
+   .extraShort { width: 2em; }
+   button { background-color: #000; color: #ccc; font: 18px Arial, sans-serif; padding: 0.1em; }
+   input.checkbox { width: 16px; height: 16px; }
+   #functionInput { width: 400px; }
+   .mainHidden { display: block; }
+   .advancedHidden { display: none; }
+   .sliderHidden { display: none; }
+   .filterHidden { display: none; }
+   hr { height: 2px; margin-top: 1.1em; }
+   .mono { font-family: monospace; }
+  </style>
+ </head>
+ <body>
+  <div id="wrapper">
+   <div id="title">
+    Available functions: +, - (sub and neg), *, /, % (mod), ^ (power), sin, cos, exp, log,
+     abs, floor, ceil, u, rect, tri, sinc, sqrt, cosh, sinh, fftshift;
+    Available constants: pi
+    <br />
+    Additional functions in complex signal mode: Re, Im, arg, fft, ifft;
+    Additional constants: i
+   </div>
+   <div id="plotwrapper">
+    <div class="plotdiv">
+     <canvas class="plot" id="plot1"></canvas>
+    </div>
+    <div class="plotdiv">
+     <canvas class="plot" id="plot2"></canvas>
+    </div>
+   </div>
+
+   <div class="formWrapper">
+     <button type="button" id="toggleMain">Show main interface</button>
+     <button type="button" id="toggleSlider">Show slider interface</button>
+     <button type="button" id="toggleFilter">Show filter interface</button>
+     <button type="button" id="toggleAdvanced">Show advanced interface</button>
+   </div>
+
+   <div class="formWrapper mainHidden" id="mainForm">
+    <div id="functionForm" class="mainHidden">
+     <label>Input function</label>
+     <input id="functionInput"></input>
+     <label id="functionError"></label>
+    </div>
+    <div id="sampleBoundForm" class="mainHidden">
+     <label>Sample window</label>
+     <input class="short" id="sampleBoundLower" value="-5"></input>
+     to
+     <input class="short" id="sampleBoundUpper" value="5"></input>
+     <label id="sampleBoundError"></label>
+    </div>
+    <div id="sampleCountForm" class="mainHidden">
+     <label>Samples</label>
+     <input type="range" id="sampleCount" min="3" max="10"></input>
+     <label id="sampleCountDisplay"></label>
+    </div>
+    <div id="leftDisplayModeForm" class="mainHidden">
+     <label>Left plot settings:</label>
+     <label>Curve</label>
+     <input type="checkbox" class="checkbox" id="plot1CurveMode"></input>
+     <label>| Stem</label>
+     <input type="checkbox" class="checkbox" id="plot1StemMode"></input>
+     <label>| Point</label>
+     <input type="checkbox" class="checkbox" id="plot1PointMode"></input>
+     <label>| Scale to fit</label>
+     <input type="checkbox" class="checkbox" id="plot1ScaleToFit"></input>
+    </div>
+    <div id="rightDisplayModeForm" class="mainHidden">
+     <label>Right plot settings:</label>
+     <label>Curve</label>
+     <input type="checkbox" class="checkbox" id="plot2CurveMode"></input>
+     <label>| Stem</label>
+     <input type="checkbox" class="checkbox" id="plot2StemMode"></input>
+     <label>| Point</label>
+     <input type="checkbox" class="checkbox" id="plot2PointMode"></input>
+     <label>| Scale to fit</label>
+     <input type="checkbox" class="checkbox" id="plot2ScaleToFit"></input>
+    </div>
+    <div id="tdModeForm" class="mainHidden">
+     <label>TD mode</label>
+     <select id="tdMode">
+      <option value="real_only_mode">Real only signal</option>
+      <option value="magni_mode">Magnitude</option>
+      <option value="parts_mode">Real + Imaginary Parts</option>
+     </select>
+     <button type="button" id="tdPartsTop" style="display:none;"></button>
+    </div>
+    <div id="fdModeForm" class="mainHidden">
+     <label>FD mode</label>
+     <select id="fdMode">
+      <option value="magni_mode">Magnitude</option>
+      <option value="parts_mode">Real + Imaginary Parts</option>
+     </select>
+     <!-- for some reason 'type="button"' is needed to stop page refreshing -->
+     <button type="button" id="fdPartsTop" style="display:none;"></button>
+    </div>
+
+    <div id="phaseColoringForm" class="mainHidden">
+     <label>Phase coloring (magnitude mode only)</label>
+     <input id="phaseColoring" type="checkbox" class="checkbox"></input>
+    </div>
+
+    <hr />
+   </div>
+
+   <div class="formWrapper sliderHidden" id="sliderInterface">
+    <button type="button" id="addSlider" class="sliderHidden">Add slider</button>
+    <div id="sliderList" class="sliderHidden">
+    </div>
+    <hr />
+   </div>
+
+   <div class="formWrapper filterHidden" id="filterForm">
+    <!--
+    <div id="filterDisplayModeForm" class="filterHidden">
+     <label>Filter display mode</label>
+     <select id="filterDisplayMode">
+      <option value="fdm_modify_td">Modify original TD plot</option>
+      <option value="fdm_modify_both">Modify both original plots</option>
+      <option value="fdm_same">Draw on same plot</option>
+      <option value="fdm_separate">Separate plots</option>
+     </select>
+    </div>
+    -->
+    <div id="filterOverlayToggleDiv">
+     <label>Show filter overlay: </label>
+     <input type="checkbox" id="filterOverlayToggle"></input>
+    </div>
+    <div id="filterModeForm" class="filterHidden">
+     <label>Filter mode</label>
+     <select id="filterMode">
+      <option value="filter_off">Off</option>
+      <option value="no_change">==== Symmetric modes ====</option>
+      <option value="sym_low_pass">Low pass (symmetric)</option>
+      <option value="sym_high_pass">High pass (symmetric)</option>
+      <option value="sym_band_pass">Band pass (symmetric)</option>
+      <option value="sym_band_stop">Band stop (symmetric)</option>
+      <option value="no_change">==== Asymmetric modes ====</option>
+      <option value="asym_low_pass">Low pass (asymmetric)</option>
+      <option value="asym_high_pass">High pass (asymmetric)</option>
+      <option value="asym_band_pass">Band pass (asymmetric)</option>
+      <option value="asym_band_stop">Band stop (asymmetric)</option>
+      <option value="no_change">==== Advanced ====</option>
+      <option value="no_change">Advanced filter mode (not yet available)</option>
+     </select>
+    </div>
+    <div id="filterSliderList">
+    </div>
+    <hr />
+   </div>
+
+   <div class="formWrapper advancedHidden" id="advancedForm">
+    <div id="revFreqForm" class="advancedHidden">
+     <label>Reverse frequencies (a.k.a. <span class="mono">fftshift</span>;
+      negative frequences on left)</label>
+     <input id="revFreqMode" type="checkbox" class="checkbox"></input>
+    </div>
+    <div id="leftDisplayModeFormAdv" class="advancedHidden">
+     <label>Additional settings for left plot:</label>
+     <label>X-axis</label>
+     <input type="checkbox" class="checkbox" id="plot1XAxisOn"></input>
+     <label>| Y-axis</label>
+     <input type="checkbox" class="checkbox" id="plot1YAxisOn"></input>
+     <label>| Bounds</label>
+     <input type="checkbox" class="checkbox" id="plot1BoundsOn"></input>
+    </div>
+    <div id="rightDisplayModeFormAdv" class="advancedHidden">
+     <label>Additional settings for right plot:</label>
+     <label>X-axis</label>
+     <input type="checkbox" class="checkbox" id="plot2XAxisOn"></input>
+     <label>| Y-axis</label>
+     <input type="checkbox" class="checkbox" id="plot2YAxisOn"></input>
+     <label>| Bounds</label>
+     <input type="checkbox" class="checkbox" id="plot2BoundsOn"></input>
+    </div>
+
+    <div id="winSizeForm" class="advancedHidden">
+     <label>Width of interface (percentage of screen space)</label>
+     <input type="range" id="winSize" min="50" max="100" step="5"></input>
+     <label id="winSizeDisplay"></label>
+    </div>
+
+    <br />
+    <div id="help">
+     Some notes and known bugs:
+     <br />
+     - In filter mode, the "Reverse frequencies" option (<span class="mono">fftshift</span>) must be
+     enabled (it is enabled by default), currently it is broken if not enabled
+     <br />
+     - "Scale to fit" mode might be helpful for plots that do not fit vertically,
+     but keep in mind that the scale in this mode may be very stretched out
+     <br />
+     - Asymmetric filtering does not work for real only signals (the imaginary part will simply not
+     be shown)
+    </div>
+
+    <hr />
+   </div>
+
+   <div class="formWrapper">
+    See the "advanced interface" for usage notes and known bugs
+   </div>
+
+  </div>
+
+  <script>
+// credit to icy for the phase coloring idea
+// https://www.mathworks.com/matlabcentral/answers/94522-why-do-i-get-a-high-frequency-
+//  oscillation-when-i-take-the-fft-of-a-rectangular-pulse
+// the proper process: fftshift td, do fft, fftshift fd, apply filter, fftshift filtered fd, do
+//  ifft, and finally fftshift filtered td
+
+// about 8 months of findings will have to be reexamined due to the fftshift issue...
+
+// annoying TODO: off by one, how can we enable filtering of the zero frequency while also
+//  enabling filtering of the outermost frequency
+// dumb FIX: add 1 to frequency limit?
+// TODO: (put off) FIX: non-revFreq mode is displaying incorrectly
+// I think the issue is that in non-revFreqMode the frequency units are different
+//  as a stopgap, non-revFreqMode will be purely cosmetic from now on, though the filter overlay
+//  is going to look weird
+// IDEA: add keyboard controls so can have tooltip and move slider at same time?
+// NOTE: two MODIFY modes: MODIFY_TD and MODIFY_TD_AND_FD
+// TODO: display filter info on main plots
+// STOP UPDATING THIS FILE until refactored; too much global dependency
+// DONE ref 1: extract dependencies from parse functions: AST_Number, parseVAR
+//  probably make cplxmode (cxm): PARSE_MODE_REAL and PARSE_MODE_CPLX
+// not todo: eliminate weird vectorization in astToFn while you're at it
+//  no, it's okay as is
+
+// ** in 4 plot mode, the transparent filter display is still shown?
+
+// TODO: zoom function...
+// minor TODO: real/imag circle order
+// minor fixed: f(log(x)) throws uncaught error, every function needs to be able to pass undefined
+//  mostly fixed, but still need TODO make safe versions of t1c/t2c so that (**) is safe
+// fixed: ifft is broken: ifft . fft gives [1,2,3,4] -> [1,4,3,2], etc.
+//  though other issues still remain
+//  see python scratch files, ifft.py
+//  resolved: but I have no idea how
+//  idea from: https://vanhunteradams.com/FFT/FFT.html#What-about-the-inverse-FFT?
+// TODO: convolution; implmement more general fft to deal with non p2 numbers*? (NO) also, figure
+//  out why the scaling is still off (seems to depend on sample window?)
+//  * for the off by one fix
+//  the slightly off part might be tolerable, for now, but the scaling must be investigated
+// TODO: verify if sample window etc. takes slider params
+// TODO: figure out why tf the array of len 1 isn't an array
+// TODO: change 'advanced' to 'additional'
+// TODO: noise function?
+// TODO: filter mode plans:
+//  new panel that when enabled, adds 2 or 3 graphs, the filter, filtered fd, and
+//  ift'd filtered fd
+//  the filter itself is a function, some presets will be available for hi/low/band etc.
+//  *transparency filter display; shade the FD display according to a real valued filter,
+//   and then show the filtered TD on the same plot as the original function
+//   this is not compatible with complex values or "fake filters", however
+//  *actually do a gradient between two colors, both translucent, seems more standard
+//  *transparent green for filtered regions is fine
+//  maybe have "simple filter mode" and "advanced filter mode"
+// TODO: factorials? summations???
+// TODO: change dropdowns to toggle buttons
+// TODO: polar mode
+// TODO: adjustable graph height, 100% is 1:1 (?)
+// TODO: param auto animation interface popup
+//  sample bounds share variable namespace !!! duplicate
+// TODO: real/imag part on/off
+// TODO: turn 2 option selects into buttons? duplicate, sort of
+// TODO: FRACTIONAL sum and product, "times" hof?
+// TODO: implement batch drawing
+// TODO: filter mode, plot 2 -> plot 3, F{input box} to indicate input gets FT'd
+// to my surprise, a backwards slider range works
+'use strict';
+// globals
+var vw;
+var fn = undefined;
+var lb; // sample lower bound
+var ub; // sample upper bound
+var sc; // sample count
+var TDPs;
+var CPLX_TDPs;
+var scTDPs; // scaled TD points
+var CPLX_TDPs_Ms;
+var CPLX_TDPs_Ps;
+var CPLX_TDPs_Rs;
+var CPLX_TDPs_Is;
+var CPLX_scTDPs_Ms;
+var CPLX_scTDPs_Rs;
+var CPLX_scTDPs_Is;
+var ffs;
+var FDPs;
+var FDPs_Ms; // magnitudes of FDPs
+var FDPs_Ps; // phases of FDPs
+var FDPs_Rs; // real parts of FDPs
+var FDPs_Is; // imaginary parts of FDPs
+var scFDPs_Ms; // scaled FD points, magnitudes
+var scFDPs_Rs;
+var scFDPs_Is;
+var ftr_FDPs; // filtered FDPs
+var ftr_FDPs_Ms;
+var ftr_FDPs_Ps;
+var ftr_FDPs_Rs;
+var ftr_FDPs_Is;
+var ftr_scFDPs_Ms;
+var ftr_scFDPs_Rs;
+var ftr_scFDPs_Is;
+var ftr_TDPs; // NOT the base form
+var ftr_CPLX_TDPs;
+var ftr_CPLX_TDPs_Ms;
+var ftr_CPLX_TDPs_Rs;
+var ftr_CPLX_TDPs_Is;
+var ftr_CPLX_TDPs_Ps;
+var ftr_scTDPs;
+var ftr_CPLX_scTDPs;
+var ftr_CPLX_scTDPs_Ms;
+var ftr_CPLX_scTDPs_Rs;
+var ftr_CPLX_scTDPs_Is
+var tdAbsXMin;
+var tdAbsXMax;
+var tdAbsYMin;
+var tdAbsYMax;
+var fdAbsXMin;
+var fdAbsXMax;
+var fdAbsYMin;
+var fdAbsYMax;
+var plot1XAxisOn;
+var plot1YAxisOn;
+var plot1CurveMode;
+var plot1StemMode;
+var plot1PointMode;
+var plot2XAxisOn;
+var plot2YAxisOn;
+var plot2CurveMode;
+var plot2StemMode;
+var plot2PointMode;
+var winSize;
+var revFreqMode;
+const REAL_ONLY_MODE = 'real_only_mode';
+const MAGNI_MODE = 'magni_mode';
+const PARTS_MODE = 'parts_mode';
+var tdMode;
+var fdMode;
+var plot1BoundsOn;
+var plot2BoundsOn;
+const REAL = 'real';
+const IMAG = 'imag';
+var tdPartsTop;
+var fdPartsTop;
+var fdpsDefined = false;
+
+var phaseColoring;
+
+var plot1ScaleToFit;
+var plot2ScaleToFit;
+
+const MAIN = 'main';
+const ADVANCED = 'advanced';
+const SLIDER = 'slider';
+const FILTER = 'filter';
+
+var showForm = {
+  MAIN: undefined,
+  ADVANCED: undefined,
+  SLIDER: undefined
+}
+
+var RE_COLOR = 'rgb(255,128,0)';
+var IM_COLOR = 'rgb(0,128,255)';
+//var RE_COLOR = 'rgb(255,0,128)';
+//var IM_COLOR = 'rgb(0,128,255)';
+
+var plot_width;
+var plot_height;
+const PLOT_WIDTH_BASE = 50;
+const PLOT_HEIGHT_BASE = 20;
+const DEFAULT_WINSIZE = 95;
+
+const DEFAULT_SAMPLE_COUNT = 8; // 2^[this value]
+const DEFAULT_SAMPLE_BOUND_LOWER = '-2*pi';
+const DEFAULT_SAMPLE_BOUND_UPPER = '2*pi';
+
+const BOTTOM_RIGHT = 'bottom_right';
+const BOTTOM_LEFT = 'bottom_left';
+const TOP_RIGHT = 'top_right';
+const TOP_LEFT = 'top_left';
+
+const SLIDER_RANGE_LB_DEFAULT = -10;
+const SLIDER_RANGE_UB_DEFAULT = 10;
+const SLIDER_STEP_SIZE_DEFAULT = 1;
+const SLIDER_STEP_COUNT_DEFAULT = 200;
+
+const PARSE_REAL_MODE = 'parse_real_mode';
+const PARSE_CPLX_MODE = 'parse_cplx_mode';
+
+const FDM_MODIFY_TD = 'fdm_modify_td';
+const FDM_SAME = 'fdm_same';
+const FDM_SEPARATE = 'fdm_separate';
+
+var filterDisplayMode;
+
+const FILTER_OFF = 'filter_off';
+const NO_CHANGE = 'no_change';
+const SYM_LOW_PASS = 'sym_low_pass';
+const SYM_HIGH_PASS = 'sym_high_pass';
+const SYM_BAND_PASS = 'sym_band_pass';
+const SYM_BAND_PASS_START = 'sym_band_pass_start';
+const SYM_BAND_PASS_WIDTH = 'sym_band_pass_width';
+const SYM_BAND_STOP = 'sym_band_stop';
+const SYM_BAND_STOP_START = 'sym_band_stop_start';
+const SYM_BAND_STOP_WIDTH = 'sym_band_stop_width';
+
+const ASYM_LOW_PASS = 'asym_low_pass';
+const ASYM_HIGH_PASS = 'asym_high_pass';
+const ASYM_BAND_PASS = 'asym_band_pass';
+const ASYM_BAND_PASS_START = 'asym_band_pass_start';
+const ASYM_BAND_PASS_WIDTH = 'asym_band_pass_width';
+const ASYM_BAND_STOP = 'asym_band_stop';
+const ASYM_BAND_STOP_START = 'asym_band_stop_start';
+const ASYM_BAND_STOP_WIDTH = 'asym_band_stop_width';
+
+var filterMode;
+
+const FILTER_SLIDER_STEP_COUNT_DEFAULT = 256;
+
+var showFilterOverlay;
+
+var filterParamMap = {};
+
+// the one global variable, for now (to be moved to main() once that exists)
+/*
+var mctx = {}; // main context
+const VW = 'vw'; mctx[VW] = null;
+*/
+
+// functions
+function updateVw() {
+  vw = 0.01 * window.innerWidth;
+  updatePlotDimensions();
+}
+
+function updatePlotDimensions() {
+  plot_width = (winSize / 100) * PLOT_WIDTH_BASE;
+  plot_height = (winSize / 100) * PLOT_HEIGHT_BASE;
+}
+
+// plot size has to be set manually in js rather than css to avoid distortion
+function resizePlots() {
+  var plots = document.getElementsByClassName("plot");
+  for (var i = 0; i < plots.length; i++) {
+    var c = plots[i];
+    var ctx = c.getContext('2d');
+    ctx.canvas.width = plot_width * vw;
+    ctx.canvas.height = plot_height * vw;
+  }
+}
+
+function handleResize() {
+  updateVw();
+  resizePlots();
+  if (fn == undefined)
+    return;
+  updateAndRedrawPlots();
+}
+
+function drawLine(plot, start_x, start_y, stop_x, stop_y, color, thickness) {
+  var c = document.getElementById(plot);
+  var ctx = c.getContext("2d");
+  //var oldAlpha = ctx.globalAlpha;
+  ctx.beginPath();
+  //ctx.globalAlpha = alpha;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = thickness;
+  ctx.moveTo(start_x, start_y);
+  ctx.lineTo(stop_x, stop_y);
+  ctx.stroke();
+  ctx.closePath();
+  //ctx.globalAlpha = oldAlpha;
+}
+
+const BG_COLOR = 'rgb(0,0,0)';
+function drawCircle(plot, x, y, r, color, thickness) {
+  var c = document.getElementById(plot);
+  var ctx = c.getContext("2d");
+  ctx.beginPath();
+  ctx.strokeStyle = BG_COLOR;
+  ctx.arc(x, y, r, 0, 2*Math.PI);
+  ctx.fill();
+  ctx.lineWidth = thickness;
+  ctx.strokeStyle = color;
+  ctx.stroke();
+  ctx.closePath();
+}
+
+function drawText(plot, x, y, font, color, align, text) {
+  var c = document.getElementById(plot);
+  var ctx = c.getContext("2d");
+  ctx.save();
+  ctx.font = font;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+// https://stackoverflow.com/questions/3167928/drawing-rotated-text-on-a-html5-canvas
+function drawTextRotated(plot, x, y, font, color, align, text, angle) {
+  var c = document.getElementById(plot);
+  var ctx = c.getContext("2d");
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  drawText(plot, 0, 0, font, color, align, text);
+  ctx.restore();
+}
+
+function drawRect(plot, x, y, width, height, color, thickness, fill, fillColor) {
+  var c = document.getElementById(plot);
+  var ctx = c.getContext("2d");
+  if (fill) {
+    ctx.beginPath();
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(x, y, width, height);
+    ctx.closePath();
+  }
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = thickness;
+  ctx.rect(x, y, width, height);
+  ctx.stroke();
+  ctx.closePath();
+}
+
+function drawRectFromCorner(plot, startCorner, x, y, width, height, color, thickness,
+ fill, fillColor) {
+  var xa;
+  var ya;
+
+  if (startCorner == TOP_LEFT) {
+    xa = x;
+    ya = y;
+  } else if (startCorner == TOP_RIGHT) {
+    xa = x - width;
+    ya = y;
+  } else if (startCorner == BOTTOM_LEFT) {
+    xa = x;
+    ya = y - height;
+  } else if (startCorner == BOTTOM_RIGHT) {
+    xa = x - width;
+    ya = y - height;
+  }
+
+  drawRect(plot, xa, ya, width, height, color, thickness, fill, fillColor);
+}
+
+function clearPlot(plot) {
+  var c = document.getElementById(plot);
+  var ctx = c.getContext("2d");
+  ctx.clearRect(0, 0, plot_width * vw, plot_height * vw);
+  ctx.beginPath();
+}
+
+function getMax(xs) {
+  var m = xs[0];
+  for (var i = 0; i < xs.length; i++)
+    if (xs[i] > m)
+      m = xs[i];
+  return m;
+}
+
+function getMin(xs) {
+  var m = xs[0];
+  for (var i = 0; i < xs.length; i++)
+    if (xs[i] < m)
+      m = xs[i];
+  return m;
+}
+
+function calcPad(boundsOn) {
+  return plot_width*vw*0.0125 * (boundsOn ? 2 : 1);
+}
+
+function scalePts_I(absPts, boundsOn, absMin, absMax) {
+  var absLeft = absPts[0][0]; // abs coords left bound
+  var absRight = absPts[absPts.length-1][0]; // abs coords right bound
+
+  var absRange = absMax - absMin;
+
+  // degenerate case of constant function
+  if (absRange == 0) {
+    absRange = 1;
+  }
+
+  var pad = calcPad(boundsOn);
+  var cnvHeight = plot_height * vw;
+  var cnvWidth = plot_width * vw;
+
+  var cnvMin = 0 + pad;
+  var cnvMax = cnvHeight - pad;
+  var cnvRange = cnvMax - cnvMin;
+
+  var cnvSpacing = (cnvWidth - 2 * pad) / (absPts.length - 1);
+
+  var cnvPts = [];
+  for (var i = 0; i < absPts.length; i++) {
+    var absY = absPts[i][1];
+    var pcntRng = (absY - absMin) / absRange;
+    var x = cnvMin + i*cnvSpacing;
+    var y = cnvMax - (pcntRng * cnvRange); // minus, b/c upside down
+    cnvPts.push([x,y]);
+  }
+
+  // the following was duct taped together, I hope it's ok
+  var cnvZeroX = ((0 - absLeft) / (absRight - absLeft)) * (cnvWidth - 2 * pad) + pad;
+  // I have no idea if the following line works but it doesn't matter as long as
+  // the y axis is always halfway
+  var cnvZeroY = cnvMax + (absMin / absRange * cnvRange);
+
+  var absXMin = absLeft;
+  var absXMax = absRight;
+  var absYMin = absMin;
+  var absYMax = absMax;
+
+  return {'cnvPts': cnvPts, 'cnvZeroY': cnvZeroY, 'cnvZeroX': cnvZeroX,
+    'absXMin': absXMin, 'absXMax': absXMax, 'absYMin': absYMin, 'absYMax': absYMax};
+}
+
+// convert point from absolute coords to canvas coords
+// also calculate zeroY and zeroX
+// uhp stands for "upper half plane", useful b/c FD only uses uhp
+function scalePts(absPts, boundsOn, scaleToFit, uhpOnly) {
+  var zs, absMax, absMin;
+  if (scaleToFit) {
+    zs = absPts.map((p) => p[1]);
+    absMax = getMax(zs);
+    absMin = getMin(zs);
+  } else {
+    zs = absPts.map((p) => p[0]);
+    var zrange = getMax(zs) - getMin(zs);
+    absMax = zrange / 2;
+    absMin = -zrange / 2;
+  }
+
+  absMin = uhpOnly ? 0 : absMin;
+
+  return scalePts_I(absPts, boundsOn, absMin, absMax);
+}
+
+/* stolen from: https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately#17243070 */
+/* by: Kamil Kiełczewski */
+// input: h in [0,360] and s,v in [0,1] - output: r,g,b in [0,1]
+function hsv2rgb(h,s,v) 
+{                              
+  let f= (n,k=(n+h/60)%6) => v - v*s*Math.max( Math.min(k,4-k,1), 0);     
+  return [f(5),f(3),f(1)];       
+}
+
+// p is in range (-pi,pi)
+// we will map (-pi,pi) -> (0, 2*pi) -> (0,360)
+// 0 will be red, pi will be cyan
+function phaseToColor(p) {
+  var p1 = p + Math.PI; // (-pi,pi) -> (0, 2*pi)
+  var p2 = p1 * (360/(2*Math.PI));
+  
+  var h = p2;
+  var s = 1;
+  var v = 1;
+
+  var [r, g, b] = hsv2rgb(h, s, v);
+
+  // need to map (0,1) to (0,255)
+  r *= 255;
+  g *= 255;
+  b *= 255;
+
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
+function phase(z) {
+  return Math.atan2(z[1], z[0]);
+}
+
+function midpt(p1, p2) {
+  return [0.5*(p2[0]+p1[0]), 0.5*(p2[1]+p1[1])];
+}
+
+function plotPtsLinear(plot, pts, color, phases) {
+  for (var i = 0; i < pts.length - 1; i++) {
+    var pt1 = pts[i];
+    var pt2 = pts[i+1];
+
+    if (phases != undefined) {
+      // draw 2 line segments of different color
+      var mpt = midpt(pt1, pt2);
+      var color1 = phaseToColor(phases[i][1]);
+      var color2 = phaseToColor(phases[i+1][1]);
+
+      drawLine(plot, pt1[0], pt1[1], mpt[0], mpt[1], color1, 2);
+      drawLine(plot, mpt[0], mpt[1], pt2[0], pt2[1], color2, 2);
+    } else {
+      drawLine(plot, pt1[0], pt1[1], pt2[0], pt2[1], color, 2);
+    }
+  }
+}
+
+function plotPtsStem(plot, zeroY, pts, color, phases) {
+  for (var i = 0; i < pts.length; i++) {
+    var pt = pts[i];
+    if (phases != undefined && phaseColoring) {
+      color = phaseToColor(phases[i][1]);
+    }
+
+    drawLine(plot, pt[0], zeroY, pt[0], pt[1], color, 1);
+  }
+
+  var last = pts[pts.length-1]
+  if (phases != undefined && phaseColoring) {
+    color = phaseToColor(phases[phases.length-1][1]);
+  }
+  drawCircle(plot, last[0], last[1], 0.15*vw, color, 1);
+}
+
+// if phases is not undefined, color is overridden
+function plotPtsPoint(plot, pts, color, phases) {
+  for (var i = 0; i < pts.length; i++) {
+    var pt = pts[i];
+    if (phases != undefined && phaseColoring) {
+      color = phaseToColor(phases[i][1]);
+    }
+
+    drawCircle(plot, pt[0], pt[1], 0.15*vw, color, 1);
+  }
+}
+
+function drawYAxis(plot, zeroX) {
+  drawLine(plot, zeroX, 0, zeroX, plot_height * vw, 'rgb(0,128,0)', 1);
+}
+
+function drawXAxis(plot, zeroY) {
+  drawLine(plot, 0, zeroY, plot_width * vw, zeroY, 'rgb(0,128,0)', 1);
+}
+
+// inclusive of both bounds
+function range(start, stop, step) {
+  var ts = [];
+  var i = start;
+  while (i <= stop + step*1e-4) {
+    ts.push(i);
+    i = i + step;
+  }
+  return ts;
+}
+
+function updateInputFunction() {
+  var fnStr = document.getElementById('functionInput').value;
+  var cxm = (tdMode == REAL_ONLY_MODE) ? PARSE_REAL_MODE : PARSE_CPLX_MODE;
+  var r = parse(fnStr, cxm, sc);
+  if (r.getType() == FAILURE || r.getType() == ERROR) {
+    document.getElementById('functionError').textContent = r.getErrMsg();
+    return false;
+  }
+  document.getElementById('functionError').textContent = '';
+  fn = astToFn(r.res, sc); // fn is global
+  return true;
+}
+
+function updateSampleCount() {
+  var pStr = document.getElementById('sampleCount').value;
+  var p = Number(pStr);
+  var n = 1 << p;
+  sc = n; // sc is global
+  document.getElementById('sampleCountDisplay').textContent = '' + n;
+
+  // apparently, not sure if it should be more general than this handler
+  // yes you were right(?), if you use the former a glitch occurs when changing the
+  // sample count in filter mode
+  // okay apparently both?? also order matters, if other way around, overlay won't clear
+  // UPDATE: incorporated inot routine itself
+  updateFilterMode();
+}
+
+function updateInputFunctionAndPlots_Keypress(e) {
+  // if the key was shift (keyCode 16) ignore it
+  var keyCode = e.keyCode;
+  if (keyCode == 16) {
+    return
+  }
+
+  updateInputFunctionAndPlots();
+}
+
+function updateInputFunctionAndPlots() {
+  if (updateInputFunction() == false)
+    return;
+  updateAndRedrawPlots();
+}
+
+function updateSampleBoundsAndPlots() {
+  if (updateSampleBounds() == false)
+    return;
+  updateAndRedrawPlots();
+}
+
+const EVAL_PARSE_ERROR = 'parse error';
+const EVAL_UNEXPECTED_ERROR = 'unexpected error';
+const EVAL_MATH_ERROR = 'math error';
+const EVAL_ERRORS = [EVAL_PARSE_ERROR, EVAL_UNEXPECTED_ERROR, EVAL_MATH_ERROR];
+
+function isEvalError(x) {
+  return EVAL_ERRORS.includes(x);
+}
+
+// used for real valued, non-vector (vlen==1) evals
+function evalWithShortcut(str) {
+  var strNum = Number(str);
+  var ret;
+  // shortcut if the string is a simple number
+  if (!isNaN(strNum)) {
+    ret = strNum;
+  } else {
+    var r = parse(str, PARSE_REAL_MODE, 1);
+    if (r.getType() == FAILURE || r.getType() == ERROR) {
+      return EVAL_PARSE_ERROR;
+    }
+    var fn = astToFn(r.res, 1);
+    if (fn == undefined) {
+      return EVAL_UNEXPECTED_ERROR;
+    }
+
+    var evalRes = Number(evalFn({'pi': [Math.PI]}, fn)); // no vtzConst here, just len 1
+
+    if (isNaN(evalRes)) {
+      return EVAL_MATH_ERROR;
+    }
+
+    ret = evalRes;
+  }
+
+  return ret;
+}
+
+function updateSampleBound(mode) {
+  var pickId = {'lower': 'sampleBoundLower', 'upper': 'sampleBoundUpper'};
+  var id = pickId[mode]
+
+  var bStr = document.getElementById(id).value;
+  var b = evalWithShortcut(bStr);
+  if (isEvalError(b)) {
+    document.getElementById('sampleBoundError').textContent = b + ' in '
+      + mode + ' bound';
+    return false;
+  }
+
+  if (mode == 'lower') {
+    lb = b; // lb, ub are global // also vector of length 1
+  } else if (mode == 'upper') {
+    ub = b;
+  } else {
+    alert('fatal error, sorry');
+  }
+
+  if (lb == undefined || ub == undefined)
+    return;
+
+  if (lb >= ub) {
+    document.getElementById('sampleBoundError').textContent = 'error: lower bound greater than or equal to upper bound';
+    return false;
+  }
+
+  var lbx = lb.toFixed(5);
+  var ubx = ub.toFixed(5);
+  document.getElementById('sampleBoundError').textContent = '(' + lbx +
+    ' to ' + ubx + ')';
+
+  return true;
+}
+
+function updateBothSampleBounds() {
+  if (updateSampleBound('lower') == false) {
+    return false;
+  }
+
+  if (updateSampleBound('upper') == false) {
+    return false;
+  }
+
+  return true;
+}
+
+function updateLowerBoundAndPlots(e) {
+  // if the key was shift (keyCode 16) ignore it
+  var keyCode = e.keyCode;
+  if (keyCode == 16) {
+    return;
+  }
+
+  if (updateSampleBound('lower') == false)
+    return;
+  updateInputFunctionAndPlots();
+}
+
+function updateUpperBoundAndPlots(e) {
+  // if the key was shift (keyCode 16) ignore it
+  var keyCode = e.keyCode;
+  if (keyCode == 16) {
+    return;
+  }
+
+  if (updateSampleBound('upper') == false)
+    return;
+  updateInputFunctionAndPlots();
+}
+
+function updateSampleCountAndPlots() {
+  updateSampleCount();
+  //updateAndRedrawPlots();
+  updateInputFunctionAndPlots(); // I guess it's dependent on sc
+}
+
+function drawBounds(plot, xMin, xMax, yMin, yMax) {
+  var pad = 0.02*plot_width*vw;
+  var w = plot_width*vw;
+  var h = plot_height*vw;
+  var font = 0.02*plot_width*vw + "px Monospace";
+  var align = "center";
+  var color = "rgb(0,255,0)";
+
+  drawText(plot, w/2, pad, font, color, align, yMax.toFixed(5));
+  drawText(plot, w/2, h - 0.25*pad, font, color, align, yMin.toFixed(5));
+  if (xMin != null)
+    drawTextRotated(plot, pad, h/2, font, color, align, xMin.toFixed(5), -Math.PI/2);
+  if (xMax != null)
+    drawTextRotated(plot, w - pad, h/2, font, color, align, xMax.toFixed(5), Math.PI/2);
+}
+
+function redrawTdPlot_R(tdps) {
+  var sc_tdps, sc_tdps_zy, sc_tdps_zx, absXMin, absXMax, absYMin, absYMax;
+  var r = scalePts(tdps, plot1BoundsOn, plot1ScaleToFit, false);
+  sc_tdps = r['cnvPts'];
+  sc_tdps_zy = r['cnvZeroY'];
+  sc_tdps_zx = r['cnvZeroX'];
+  absXMin = r['absXMin'];
+  absXMax = r['absXMax'];
+  absYMin = r['absYMin'];
+  absYMax = r['absYMax'];
+
+  clearPlot("plot1");
+  if (plot1XAxisOn) { drawXAxis("plot1", sc_tdps_zy); }
+  if (plot1YAxisOn) { drawYAxis("plot1", sc_tdps_zx); }
+  if (plot1CurveMode) { plotPtsLinear("plot1", sc_tdps, 'rgb(0,255,0)', undefined); }
+  if (plot1StemMode) { plotPtsStem("plot1", sc_tdps_zy, sc_tdps, 'rgb(0,255,0)',
+    undefined); }
+  if (plot1PointMode) { plotPtsPoint("plot1", sc_tdps, 'rgb(0,255,0)', undefined); }
+
+  if (plot1BoundsOn) {
+    drawBounds("plot1", absXMin, absXMax, absYMin, absYMax);
+  }
+
+  var rt = {
+    'sc_tdps': sc_tdps,
+    'absXMin': absXMin,
+    'absXMax': absXMax,
+    'absYMin': absYMin,
+    'absYMax': absYMax
+  }
+
+  return rt;
+}
+
+const TD = 'TD';
+const FD = 'FD';
+function redrawFdPlot() {
+  var rt = redrawPlot(FD, fdMode, "plot2", FDPs_Ms, FDPs_Ps, FDPs_Rs, FDPs_Is, plot2BoundsOn,
+    plot2ScaleToFit, plot2XAxisOn, plot2YAxisOn, plot2CurveMode, plot2StemMode, plot2PointMode,
+    fdPartsTop);
+
+  scFDPs_Ms = rt['sc_Ms'];
+  scFDPs_Rs = rt['sc_Rs'];
+  scFDPs_Is = rt['sc_Is'];
+  fdAbsXMin = rt['absXMin'];
+  fdAbsXMax = rt['absXMax'];
+  fdAbsYMin = rt['absYMin'];
+  fdAbsYMax = rt['absYMax'];
+}
+
+function redrawFdPlotFiltered() {
+  var rt = redrawPlot(FD, fdMode, "plot2", ftr_FDPs_Ms, ftr_FDPs_Ps, ftr_FDPs_Rs, ftr_FDPs_Is,
+    plot2BoundsOn, plot2ScaleToFit, plot2XAxisOn, plot2YAxisOn, plot2CurveMode, plot2StemMode,
+    plot2PointMode, fdPartsTop);
+
+  ftr_scFDPs_Ms = rt['sc_Ms'];
+  ftr_scFDPs_Rs = rt['sc_Rs'];
+  ftr_scFDPs_Is = rt['sc_Is'];
+  fdAbsXMin = rt['absXMin'];
+  fdAbsXMax = rt['absXMax'];
+  fdAbsYMin = rt['absYMin'];
+  fdAbsYMax = rt['absYMax'];
+}
+
+function redrawTdPlot() {
+  if (tdMode == REAL_ONLY_MODE) {
+    var rt = redrawTdPlot_R(TDPs);
+    scTDPs = rt['sc_tdps'];
+    tdAbsXMin = rt['absXMin'];
+    tdAbsXMax = rt['absXMax'];
+    tdAbsYMin = rt['absYMin'];
+    tdAbsYMax = rt['absYMax'];
+    return;
+  }
+
+  var rt = redrawPlot(TD, tdMode, "plot1", CPLX_TDPs_Ms, CPLX_TDPs_Ps, CPLX_TDPs_Rs, CPLX_TDPs_Is,
+    plot1BoundsOn, plot1ScaleToFit, plot1XAxisOn, plot1YAxisOn, plot1CurveMode, plot1StemMode,
+    plot1PointMode, tdPartsTop);
+
+  CPLX_scTDPs_Ms = rt['sc_Ms'];
+  CPLX_scTDPs_Rs = rt['sc_Rs'];
+  CPLX_scTDPs_Is = rt['sc_Is'];
+  tdAbsXMin = rt['absXMin'];
+  tdAbsXMax = rt['absXMax'];
+  tdAbsYMin = rt['absYMin'];
+  tdAbsYMax = rt['absYMax'];
+}
+
+function redrawTdPlotFiltered() {
+  if (tdMode == REAL_ONLY_MODE) {
+    var rt = redrawTdPlot_R(ftr_TDPs);
+    ftr_scTDPs = rt['sc_tdps'];
+    tdAbsXMin = rt['absXMin'];
+    tdAbsXMax = rt['absXMax'];
+    tdAbsYMin = rt['absYMin'];
+    tdAbsYMax = rt['absYMax'];
+    return;
+  }
+
+  var rt = redrawPlot(TD, tdMode, "plot1", ftr_CPLX_TDPs_Ms, ftr_CPLX_TDPs_Ps, ftr_CPLX_TDPs_Rs,
+    ftr_CPLX_TDPs_Is, plot1BoundsOn, plot1ScaleToFit, plot1XAxisOn, plot1YAxisOn, plot1CurveMode,
+    plot1StemMode, plot1PointMode, tdPartsTop);
+
+  ftr_CPLX_scTDPs_Ms = rt['sc_Ms'];
+  ftr_CPLX_scTDPs_Rs = rt['sc_Rs'];
+  ftr_CPLX_scTDPs_Is = rt['sc_Is'];
+  tdAbsXMin = rt['absXMin'];
+  tdAbsXMax = rt['absXMax'];
+  tdAbsYMin = rt['absYMin'];
+  tdAbsYMax = rt['absYMax'];
+}
+
+// not to be confused with redrawPlots
+// remember, updateTDPlot and updateFDPlot also need to be changed...
+function redrawPlot(domain, mode, p_plot, p_Ms, p_Ps, p_Rs, p_Is, p_boundsOn, p_scaleToFit,
+ p_xAxisOn, p_yAxisOn, p_curveMode, p_stemMode, p_pointMode, p_partsTop) {
+  var plot;
+  var Ms;
+  var Ps;
+  var Rs;
+  var Is;
+  var boundsOn;
+  var scaleToFit;
+  var sc_Ms;
+  var sc_Rs;
+  var sc_Is;
+  var sc_zy;
+  var sc_zx;
+  var absXMin;
+  var absXMax;
+  var absYMin;
+  var absYMax;
+  var xAxisOn;
+  var yAxisOn;
+  var curveMode;
+  var stemMode;
+  var pointMode;
+  var partsTop;
+
+  plot = p_plot;
+  Ms = p_Ms;
+  Ps = p_Ps;
+  Rs = p_Rs;
+  Is = p_Is
+  boundsOn = p_boundsOn;
+  scaleToFit = p_scaleToFit;
+  xAxisOn = p_xAxisOn;
+  yAxisOn = p_yAxisOn;
+  curveMode = p_curveMode;
+  stemMode = p_stemMode;
+  pointMode = p_pointMode;
+  partsTop = p_partsTop;
+
+  /*if (domain == FD) {
+    plot = "plot2";
+    Ms = FDPs_Ms;
+    Ps = FDPs_Ps;
+    Rs = FDPs_Rs;
+    Is = FDPs_Is
+    boundsOn = plot2BoundsOn;
+    scaleToFit = plot2ScaleToFit;
+    xAxisOn = plot2XAxisOn;
+    yAxisOn = plot2YAxisOn;
+    curveMode = plot2CurveMode;
+    stemMode = plot2StemMode;
+    pointMode = plot2PointMode;
+    partsTop = fdPartsTop;
+  } else { // if TD
+    plot = "plot1";
+    Ms = CPLX_TDPs_Ms;
+    Ps = CPLX_TDPs_Ps;
+    Rs = CPLX_TDPs_Rs;
+    Is = CPLX_TDPs_Is;
+    boundsOn = plot1BoundsOn;
+    scaleToFit = plot1ScaleToFit;
+    xAxisOn = plot1XAxisOn;
+    yAxisOn = plot1YAxisOn;
+    curveMode = plot1CurveMode;
+    stemMode = plot1StemMode;
+    pointMode = plot1PointMode;
+    partsTop = tdPartsTop;
+  }*/
+
+  if (mode == MAGNI_MODE) {
+    // the following is part of the "init" stuff
+    var r = scalePts(Ms, boundsOn, scaleToFit, true);
+    sc_Ms = r['cnvPts'];
+    sc_zy = r['cnvZeroY'];
+    sc_zx = r['cnvZeroX'];
+    absXMin = r['absXMin'];
+    absXMax = r['absXMax'];
+    absYMin = r['absYMin'];
+    absYMax = r['absYMax'];
+
+    clearPlot(plot);
+    if (xAxisOn) { drawXAxis(plot, sc_zy); }
+    //if (yAxisOn) { drawYAxis(plot, sc_zx); }
+    if (yAxisOn && (domain == TD || revFreqMode)) { drawYAxis(plot, sc_zx); }
+    if (phaseColoring) {
+      if (curveMode) { plotPtsLinear(plot, sc_Ms, undefined, Ps); }
+      if (stemMode) { plotPtsStem(plot, sc_zy, sc_Ms, undefined,
+        Ps); }
+      if (pointMode) { plotPtsPoint(plot, sc_Ms, undefined, Ps); }
+    } else {
+      if (curveMode) { plotPtsLinear(plot, sc_Ms, 'rgb(0,255,0)',
+        undefined); }
+      if (stemMode) { plotPtsStem(plot, sc_zy, sc_Ms, 'rgb(0,255,0)',
+        undefined); }
+      if (pointMode) { plotPtsPoint(plot, sc_Ms, 'rgb(0,255,0)',
+        undefined); }
+    }
+
+  } else if (mode == PARTS_MODE) {
+    var Rs_absYMin = getMin(Rs.map((p) => p[1]));
+    var Rs_absYMax = getMax(Rs.map((p) => p[1]));
+
+    var Is_absYMin = getMin(Is.map((p) => p[1]));
+    var Is_absYMax = getMax(Is.map((p) => p[1]));
+
+    absYMin = getMin([Rs_absYMin, Is_absYMin]);
+    absYMax = getMax([Rs_absYMax, Is_absYMax]);
+
+    var rr, ri;
+    if (scaleToFit) {
+      rr = scalePts_I(Rs, boundsOn, absYMin, absYMax);
+      ri = scalePts_I(Is, boundsOn, absYMin, absYMax);
+    } else {
+      var xmin = Rs[0][0];
+      var xmax = Rs[Rs.length-1][0]
+
+      if (mode == FD) {
+        if (!revFreqMode) { // stopgap
+          var halfRange = (xmax - xmin) >> 1;
+          xmin -= halfRange;
+          xmax -= halfRange;
+        }
+        rr = scalePts_I(Rs, boundsOn, xmin, xmax);
+        ri = scalePts_I(Is, boundsOn, xmin, xmax);
+      } else { // if TD
+        var rng = Math.abs(xmax-xmin);
+        var mid = (xmax+xmin)/2;
+        var min = -rng/2;
+        var max = rng/2;
+        rr = scalePts_I(Rs, boundsOn, min, max);
+        ri = scalePts_I(Is, boundsOn, min, max);
+      }
+    }
+
+    sc_Rs = rr['cnvPts'];
+    var Rs_zy = rr['cnvZeroY'];
+    var Rs_zx = rr['cnvZeroX'];
+    var Rs_absXMin = rr['absXMin'];
+    var Rs_absXMax = rr['absXMax'];
+
+    sc_Is = ri['cnvPts'];
+    var Is_zy = ri['cnvZeroY'];
+    var Is_zx = ri['cnvZeroX'];
+    var Is_absXMin = ri['absXMin'];
+    var Is_absXMax = ri['absXMax'];
+
+    sc_zy = (Rs_zy + Is_zy) / 2; // pick avg. as compromise
+    sc_zx = (Rs_zx + Is_zx) / 2; // ?
+    absXMin = getMin([Rs_absXMin, Is_absXMin]);
+    absXMax = getMax([Rs_absXMax, Is_absXMax]);
+
+    var reColor = RE_COLOR;
+    var imColor = IM_COLOR;
+
+    clearPlot(plot);
+    if (xAxisOn) { drawXAxis(plot, sc_zy); }
+    if (yAxisOn) {
+      if (domain == FD && revFreqMode) {
+        //drawYAxis(plot, plot_width * vw / 2);
+        drawYAxis(plot, sc_zx);
+      } else { // if TD
+        drawYAxis(plot, sc_zx);
+      }
+    }
+
+    var f1;
+    var f2;
+
+    function order(f1, f2) {
+      if (partsTop == REAL) {
+        f2(); f1();
+      } else {
+        f1(); f2();
+      }
+    }
+
+    if (curveMode) {
+      f1 = () => plotPtsLinear(plot, sc_Rs, reColor, undefined);
+      f2 = () => plotPtsLinear(plot, sc_Is, imColor, undefined);
+      order(f1, f2);
+    }
+    if (stemMode) {
+      f1 = () => plotPtsStem(plot, sc_zy, sc_Rs, reColor, undefined);
+      f2 = () => plotPtsStem(plot, sc_zy, sc_Is, imColor, undefined);
+      order(f1, f2);
+    }
+    if (pointMode) {
+      f1 = () => plotPtsPoint(plot, sc_Rs, reColor, undefined);
+      f2 = () => plotPtsPoint(plot, sc_Is, imColor, undefined);
+      order(f1, f2);
+    }
+  }
+
+  if (boundsOn) {
+    var ymax_disp;
+    var ymin_disp;
+    if (scaleToFit) {
+      if (mode == REAL_ONLY_MODE || mode == PARTS_MODE) {
+        var frs = Rs.map((p) => p[1]);
+        var fis = Is.map((p) => p[1]);
+        ymax_disp = getMax([getMax(frs), getMax(fis)]);
+        ymin_disp = getMin([getMin(frs), getMin(fis)]);
+      } else if (mode == MAGNI_MODE) {
+        var fms = Ms.map((p) => p[1]);
+        ymax_disp = getMax(fms);
+        ymin_disp = 0;
+      }
+    } else {
+      var last = Ms[Ms.length-1][0];
+      var first = Ms[0][0];
+      if (mode == REAL_ONLY_MODE || mode == PARTS_MODE) {
+        var hrng = (last - first) / 2;
+        ymax_disp = +hrng;
+        ymin_disp = -hrng;
+      } else if (mode == MAGNI_MODE) {
+        ymax_disp = (last - first) / 2;
+        ymin_disp = 0;
+      }
+    }
+
+    drawBounds(plot, absXMin, absXMax, ymin_disp, ymax_disp);
+  }
+
+  var rt = {
+    'sc_Ms': sc_Ms,
+    'sc_Rs': sc_Rs,
+    'sc_Is': sc_Is,
+    'absXMin': absXMin,
+    'absXMax': absXMax,
+    'absYMin': absYMin,
+    'absYMax': absYMax
+  }
+
+  return rt;
+
+  // if only there were references
+  /*if (domain == FD) {
+    FDPs_Ms = Ms;
+    scFDPs_Ms = sc_Ms; // there is no sc_Ps afaik
+    scFDPs_Rs = sc_Rs;
+    scFDPs_Is = sc_Is;
+    scFDPs_zy = sc_zy;
+    scFDPs_zx = sc_zx;
+    fdAbsXMin = absXMin;
+    fdAbsXMax = absXMax;
+    fdAbsYMin = absYMin;
+    fdAbsYMax = absYMax;
+  } else { // if domain == TD
+    CPLX_TDPs_Ms = Ms;
+    CPLX_scTDPs_Ms = sc_Ms;
+    CPLX_scTDPs_Rs = sc_Rs;
+    CPLX_scTDPs_Is = sc_Is;
+    CPLX_scTDPs_zy = sc_zy;
+    CPLX_scTDPs_zx = sc_zx;
+    tdAbsXMin = absXMin;
+    tdAbsXMax = absXMax;
+    tdAbsYMin = absYMin;
+    tdAbsYMax = absYMax;
+  }*/
+}
+
+function redrawPlots() {
+  if (fn == undefined || (tdMode == REAL_ONLY_MODE && TDPs == undefined) ||
+      (tdMode != REAL_ONLY_MODE && CPLX_TDPs == undefined) || !fdpsDefined) {
+    return;
+  }
+
+  // wasteful, but it gives an error when changing modes when you don't do it and I"m too
+  // lazy to figure out all the dependencies blah blah
+  redrawTdPlot();
+  redrawFdPlot();
+  if (filterMode != FILTER_OFF) {
+    redrawTdPlotFiltered();
+    redrawFdPlotFiltered();
+  }
+
+  if (showFilterOverlay && filterMode != FILTER_OFF) {
+    drawFilterOverlay('plot2', plot2BoundsOn);
+  }
+}
+
+function zip(xs, ys) {
+  var zs;
+  for (var i = 0; i < xs.length; i++) {
+    zs.push(xs[i], ys[i]);
+  }
+  return zs;
+}
+
+const realFail = (x) => isNaN(x) || [Infinity, -Infinity].includes(x);
+const cplxFail = (z) => realFail(z[0]) || realFail(z[1]);
+
+const FAIL_REAL = 'fail_real';
+const FAIL_CPLX = 'fail_cplx';
+
+function pickFail(fmode) {
+  return (fmode == FAIL_REAL) ? realFail : cplxFail;
+}
+
+function safeMap(fmode, f, xs) {
+  if (xs == undefined) { return undefined; }
+
+  var fail = pickFail(fmode);
+  var fi;
+  var fs = [];
+  for (var i = 0; i < xs.length; i++) {
+    fi = f(xs[i]);
+    if (fail(fi)) {
+      //console.log('check failed in safeMap: x, f(x): ' + xs[i] + ', ' + fi);
+      return undefined;
+    }
+    fs.push(fi);
+  }
+  return fs;
+}
+
+function safeZip(fmode, xs, ys) {
+  if (xs == undefined || ys == undefined) { return undefined; }
+  if (xs.length != ys.length) { return undefined; }
+
+  var fail = pickFail(fmode);
+  var zs = [];
+
+  for (var i = 0; i < xs.length; i++) {
+    var x = xs[i];
+    var y = ys[i];
+    if (fail(x) || fail(y)) {
+      //console.log('check failed in safeZip: x, f(x): ' + xs[i] + ', ' + fi);
+      return undefined;
+    }
+    zs.push([x,y]);
+  }
+  return zs;
+}
+
+function safeApply(fmode,f, xs) {
+  if (xs == undefined) { return undefined; }
+
+  var fail = pickFail(fmode);
+  var res = f.apply(null, xs);
+
+  for (var i = 0; i < res.length; i++) {
+    if (fail(res[i])) {
+      return undefined;
+    }
+  }
+
+  return res;
+}
+
+function mergeDicts(d1, d2) {
+  return Object.assign({}, d1, d2);
+}
+
+var vtzConst = (x) => replicate(sc, x);
+const realConstants = {'pi': Math.PI};
+const cplxConstants = {'pi': cplxFromReal(Math.PI), 'i': cplx(0,1)};
+
+function array_format(xs) {
+  if (!Array.isArray(xs)) {
+    return String(xs);
+  }
+
+  var st = '[';
+  for (var i = 0; i < xs.length; i++) {
+    var x = xs[i];
+    var z;
+    if (Array.isArray(x)) {
+      z = array_format(x);
+    } else {
+      z = String(x);
+    }
+    st += z;
+    if (i < xs.length-1) {
+      st += ',';
+    }
+  }
+  return st + ']';
+}
+
+function updateTdPlot_R() {
+  var pvDict = {};
+  var params = Object.keys(sliderParamMap);
+  // can't use forEach b/c undefined needs to be handled
+  for (var i = 0; i < params.length; i++) {
+    var p = params[i];
+    if (sliderParamMap[p] != undefined) {
+      var v = sliderParamMap[p]['ParamValue'];
+      pvDict[p] = vtzConst((tdMode == REAL_ONLY_MODE) ? v : cplxFromReal(v));
+    }
+  }
+  //params.forEach((p) => pvDict[p] = sliderParamMap[p]['ParamValue']);
+
+  var h = (ub - lb) / (sc - 1); // offby1
+  var ts = range(lb,ub,h); // will be saved for zipping
+  var tsc = (tdMode == REAL_ONLY_MODE) ? ts : ts.map(cplxFromReal);
+  var dc = (tdMode == REAL_ONLY_MODE) ? realConstants : cplxConstants;
+  var dcv = {}; // manual vectoriziation of constants...
+  Object.keys(dc).forEach((k) => dcv[k] = replicate(sc, dc[k]));
+  var d2 = mergeDicts(dcv, pvDict);
+  //var f = (x) => evalFn(mergeDicts(d2, {'x': x}), fn);
+  //var fs = safeMap(f, tsc);
+
+  // in vector mode, tsc is x
+  var fs = evalFn(mergeDicts(d2, {'x': tsc}), fn);
+
+  if (fs == undefined) {
+    //console.log('DEBUG: fn: ' + fn);
+    //console.log('DEBUG: ts.length ' + ts.length);
+    document.getElementById('functionError').textContent = 'error evaluating function';
+    return undefined;
+  }
+
+  if (tdMode == REAL_ONLY_MODE) {
+    TDPs = zip(ts, fs);
+  } else {
+    CPLX_TDPs = zip(ts, fs);
+  }
+
+  return true;
+}
+
+function updateTdPlot() {
+  var r = updateTdPlot_R();
+  if (r == undefined) return undefined;
+
+  if (tdMode != REAL_ONLY_MODE) {
+    updatePlot(TD, tdMode);
+  }
+  return true;
+}
+
+function updateFdPlot() {
+  var fsCplx;
+  if (tdMode == REAL_ONLY_MODE) {
+    var fs = TDPs.map((p) => p[1]);
+    fsCplx = fs.map(cplxFromReal);
+  } else {
+    fsCplx = CPLX_TDPs.map((p) => p[1]);
+  }
+
+  // took 8 months to find out a shift was needed here
+  // to return to the old (incorrect) mode, comment out the fftshift below
+  var fsCplx_s = fftshift(fsCplx);
+  //var fsCplx_s = fsCplx;
+  ffs = fft(fsCplx_s);
+  if (ffs == undefined) {
+    document.getElementById('functionError').textContent = 'error performing fft';
+    return undefined;
+  }
+
+  updatePlot(FD, fdMode);
+  return true;
+}
+
+// name stolen from matlab
+// conveniently, this function is its own inverse
+function fftshift(xs) {
+  var halfLength = xs.length >> 1;
+  var newXs = xs.slice(halfLength).concat(xs.slice(0, halfLength));
+  return newXs;
+}
+
+function updatePlot(domain, mode) {
+  var ys;
+  var Ms; // this again
+  var Ps;
+  var Rs;
+  var Is;
+  var ts;
+
+  if (domain == FD) {
+    ys = ffs;
+    // arbitrary units for frequency
+    if (revFreqMode) {
+      ys = fftshift(ys);
+      ts = range(-sc/2, sc/2-1, 1);
+    } else {
+      ts = range(0, sc, 1);
+    }
+
+  } else { // if TD
+    if (tdMode == REAL_ONLY_MODE) {
+      ts = TDPs.map((p) => p[0]);
+      var fs = TDPs.map((p) => p[1]); // ew
+      ys = fs.map(cplxFromReal);
+    } else {
+      ts = CPLX_TDPs.map((p) => p[0]);
+      ys = CPLX_TDPs.map((p) => p[1]);
+    }
+  }
+
+  var yms = ys.map(norm); // magnitudes
+  var yps = ys.map(phase); // phases
+  Ms = zip(ts, yms);
+  Ps = zip(ts, yps);
+
+  var yrs = ys.map((p) => p[0]); // real parts
+  var yis = ys.map((p) => p[1]); // imaginary parts
+  Rs = zip(ts, yrs);
+  Is = zip(ts, yis);
+
+  // needed for mutation due to lack of references
+  if (domain == FD) {
+    fdpsDefined = true;
+    FDPs_Ms = Ms;
+    FDPs_Ps = Ps;
+    FDPs_Rs = Rs;
+    FDPs_Is = Is;
+
+    // actual FDPs wasn't previously necessary, but will now be used for filtering
+    FDPs = zip(ts, ys);
+  } else { // if TD
+    CPLX_TDPs_Ms = Ms;
+    CPLX_TDPs_Ps = Ps;
+    CPLX_TDPs_Rs = Rs;
+    CPLX_TDPs_Is = Is;
+  }
+}
+
+function updateAndRedrawPlots() {
+  if (fn == undefined)
+    return;
+
+  var r = updateTdPlot();
+  if (r == undefined) return undefined;
+
+  r = updateFdPlot();
+  if (r == undefined) return undefined;
+
+  if (filterMode != FILTER_OFF) {
+    applyFilter();
+  }
+
+  redrawPlots();
+}
+
+// rdp.js direct import (with some modifications)
+const SUCCESS = 'success'
+const FAILURE = 'failure'
+const ERROR = 'error'
+
+function PR_Success(res, xs) {
+  var pr = new Object()
+  pr.type = SUCCESS
+  pr.res = res
+  pr.xs = xs
+  pr.getType = () => pr.type
+  pr.getRes = () => pr.res
+  pr.getXs = () => pr.xs
+  return pr
+}
+
+function PR_Failure(xs) {
+  var pr = new Object()
+  pr.type = FAILURE
+  pr.xs = xs
+  pr.getType = () => pr.type
+  pr.getXs = () => pr.xs
+  return pr
+}
+
+function PR_Error(errMsg) {
+  var pr = new Object()
+  pr.type = ERROR
+  pr.errMsg = errMsg
+  pr.getType = () => pr.type
+  pr.getErrMsg = () => pr.errMsg
+  return pr
+}
+
+const NUMBER = 'number'
+const VARIABLE = 'variable'
+const FUNCTION = 'function'
+
+function makeCplxIfNeeded(cxm, x) {
+  return (cxm == PARSE_REAL_MODE) ? x : cplxFromReal(x);
+}
+
+function AST_Number(data, cxm) {
+  var ast = new Object()
+  ast.type = NUMBER
+  ast.data = makeCplxIfNeeded(cxm, data)
+  ast.getType = () => ast.type
+  ast.getData = () => ast.data
+  return ast
+}
+
+function AST_Variable(data, cxm) {
+  var ast = new Object()
+  ast.type = VARIABLE
+  ast.data = data;
+  ast.getType = () => ast.type
+  ast.getData = () => ast.data
+  return ast
+}
+
+function AST_Function(root, children, cxm) {
+  var ast = new Object()
+  ast.type = FUNCTION
+  ast.root = root
+  ast.children = children
+  ast.getType = () => ast.type
+  ast.getRoot = () => ast.root
+  ast.getChildren = () => ast.children
+
+  // make "real" function
+  ast.realFn = pickActualFn(cxm)[root]
+  ast.getRealFn = () => ast.realFn
+  return ast
+}
+
+function isDigit(st) {
+  return /^[0-9]+$/.test(st)
+}
+
+function isAlpha(st) {
+  return /^[A-Za-z]+$/.test(st)
+}
+
+function contains(list, item) {
+  return list.indexOf(item) >= 0
+}
+
+// only to be used on PR_Success
+function unpack(pr) {
+  return [pr.getRes(), pr.getXs()]
+}
+
+// parse 0+ space characters
+function parseSpaces(xs) {
+  while (xs != '' && xs[0] == ' ') {
+    var xs = xs.slice(1)
+  }
+  return PR_Success(null, xs)
+}
+
+function parseOperator(xs, operators) {
+  for (var i = 0; i < operators.length; i++) {
+    var op = operators[i]
+    if (xs.length >= op.length && xs.slice(0,op.length) == op) {
+      return PR_Success(op, xs.slice(op.length))
+    }
+  }
+  return PR_Failure(xs)
+}
+
+function makeBinOperParser(operators, innerParser) {
+  function f(xs, cxm) {
+    var [d, xs] = unpack(parseSpaces(xs))
+
+    var r = innerParser(xs, cxm)
+    if (r.getType() == FAILURE || r.getType() == ERROR) {
+      return r
+    }
+
+    var [t1, xs] = unpack(r)
+
+    while (xs != '') {
+      var r = parseOperator(xs, operators)
+      if (r.getType() == FAILURE) { // can't be ERROR
+        break
+      }
+      var [op, xs] = unpack(r)
+
+      var r = innerParser(xs, cxm)
+      if (r.getType() == ERROR) {
+        return r
+      } else if (r.getType() == FAILURE) {
+        var errMsg = 'error 0, reached end of input'
+        return PR_Error(errMsg)
+      }
+
+      var [t2, xs] = unpack(r)
+
+      t1 = AST_Function(op, [t1, t2], cxm)
+    }
+
+    return PR_Success(t1, xs)
+  }
+  return f
+}
+
+function parseOptions(xs, cxm, opts) {
+  var ps = opts
+  while (ps.length > 0) {
+    var p = ps[0]
+    var r = p(xs, cxm)
+    if (r.getType() == ERROR || r.getType() == SUCCESS) {
+      return r
+    }
+    ps = ps.slice(1)
+  }
+
+  return PR_Failure(xs)
+}
+
+function parse(xs, cxm) {
+  var r = parseEXPR(xs, cxm);
+  if (r.getType() != SUCCESS || r.getXs().length != 0) {
+    return PR_Error('parse failed');
+  }
+  return r;
+}
+
+// doing var parseEXPR = ... is not recommended due to hoisting issue
+function parseEXPR(xs, cxm) {
+  return makeBinOperParser(['+','-'], parseTERM)(xs, cxm)
+}
+
+function parseTERM(xs, cxm) {
+  return makeBinOperParser(['**','*','/','%'], parseFACT)(xs, cxm)
+}
+
+function parseFACT(xs, cxm) {
+  var [d, xs1] = unpack(parseSpaces(xs))
+
+  var r = parseOperator(xs1, ['+','-'])
+  if (r.getType() == SUCCESS) {
+    var hasOp = true
+    var [op, xs2] = unpack(r)
+  } else { // can't be ERROR, so must be FAILURE
+    var hasOp = false
+    xs2 = xs
+  }
+
+  var [d, xs3] = unpack(parseSpaces(xs2))
+
+  var r = parseXPNL(xs3, cxm)
+  if (r.getType() == ERROR || r.getType() == FAILURE) {
+    return r
+  }
+
+  var [t, xs4] = unpack(r)
+  var [d, xs5] = unpack(parseSpaces(xs4))
+
+  var ast;
+  if (hasOp) {
+    var pickAstOp = {'+': 'pos', '-': 'neg'}
+    var astOp = pickAstOp[op]
+    ast = AST_Function(astOp, [t], cxm)
+  } else {
+    ast = t
+  }
+
+  return PR_Success(ast, xs5)
+}
+
+function parseXPNL(xs, cxm) {
+  return makeBinOperParser(['^'], parsePFA)(xs, cxm)
+}
+
+function parsePFA(xs, cxm) {
+  return parseOptions(xs, cxm, [parsePREX, parseFNAP, parseATOM])
+}
+
+function parsePREX(xs, cxm) {
+  var r = parseOperator(xs, '(')
+  if (r.getType() == FAILURE) { // can't be ERROR
+    return r
+  }
+
+  var [d, xs1] = unpack(r)
+
+  var r = parseEXPR(xs1, cxm)
+  if (r.getType() == ERROR) {
+    return r
+  } else if (r.getType() == FAILURE) {
+    var errMsg = 'error 2: expression expected after "("'
+    return PR_Error(errMsg)
+  }
+
+  var [t, xs2] = unpack(r)
+
+  var r = parseOperator(xs2, ')')
+  if (r.getType() == FAILURE) {
+    var errMsg = 'error 3: expected ")"'
+    return PR_Error(errMsg)
+  }
+
+  var [d, xs3] = unpack(r)
+
+  return PR_Success(t, xs3)
+}
+
+function parseFNAP(xs, cxm) {
+  var r = parseBINF(xs, cxm)
+  if (r.getType() == FAILURE) { // can't be ERROR
+    return r
+  }
+
+  var [fn, xs1] = unpack(r)
+
+  var [d, xs2] = unpack(parseSpaces(xs1))
+
+  var r = parsePREX(xs2, cxm)
+  if (r.getType() == ERROR) {
+    return r
+  } else if (r.getType() == FAILURE) {
+    var errMsg = 'error 1, expected parentheses expression after function name'
+    return PR_Error(errMsg)
+  }
+
+  var [ex, xs3] = unpack(r)
+
+  var t = AST_Function(fn, [ex], cxm)
+  return PR_Success(t, xs3)
+}
+
+function parseBINF(xs, cxm) {
+  return parseOperator(xs, binfs)
+}
+
+// parseDEC needs to come before parseINT
+function parseATOM(xs, cxm) {
+  return parseOptions(xs, cxm, [parseDEC, parseINT, parseVAR])
+}
+
+function parseDEC1(xs, cxm) {
+  var xs1 = xs
+
+  var beforeDec = ''
+  while (xs1 != '' && isDigit(xs1[0])) {
+    beforeDec += xs1[0]
+    xs1 = xs1.slice(1)
+  }
+
+  if (xs1[0] != '.') {
+    return PR_Failure(xs)
+  }
+
+  xs1 = xs1.slice(1)
+  if (!(xs1 != '' && isDigit(xs1[0]))) {
+    return PR_Failure(xs)
+  }
+
+  var afterDec = ''
+  while (xs1 != '' && isDigit(xs1[0])) {
+    afterDec += xs1[0]
+    xs1 = xs1.slice(1)
+  }
+
+  var num = Number(beforeDec + '.' + afterDec)
+  return PR_Success(AST_Number(num, cxm), xs1)
+}
+
+function parseDEC2(xs, cxm) {
+  if (!(xs != '' && isDigit(xs[0]))) {
+    return PR_Failure(xs)
+  }
+
+  var xs1 = xs
+
+  var beforeDec = ''
+  while (xs1 != '' && isDigit(xs1[0])) {
+    beforeDec += xs1[0]
+    xs1 = xs1.slice(1)
+  }
+
+  if (!(xs1 != '' && xs1[0] == '.')) {
+    return PR_Failure(xs)
+  }
+
+  xs1 = xs1.slice(1) // strip off the '.'
+
+  var num = Number(beforeDec)
+  return PR_Success(AST_Number(num, cxm), xs1)
+}
+
+function parseDEC(xs, cxm) {
+  return parseOptions(xs, cxm, [parseDEC1, parseDEC2])
+}
+
+function parseINT(xs, cxm) {
+  if (!(xs != '' && isDigit(xs[0]))) {
+    return PR_Failure(xs)
+  }
+
+  var term = ''
+  while (xs != '' && isDigit(xs[0])) {
+    term += xs[0]
+    xs = xs.slice(1)
+  }
+
+  var num = Number(term)
+  return PR_Success(AST_Number(num, cxm), xs)
+}
+
+function parseVAR(xs, cxm) {
+  if (xs.length >= 1 && xs[0] == 'x') {
+    return PR_Success(AST_Variable('x', cxm), xs.slice(1))
+  } else if (cxm != PARSE_REAL_MODE && xs.length >= 1 && xs.slice(0,1) == 'i') {
+    return PR_Success(AST_Variable('i', cxm), xs.slice(1))
+  } else if (xs.length >= 2 && xs.slice(0,2) == 'pi') {
+    return PR_Success(AST_Variable('pi', cxm), xs.slice(2))
+  } else {
+    var sliderParams = Object.keys(sliderParamMap);
+    // not using forEach here b/c want to use return, also undefined's have to be handled
+    for (var i = 0; i < sliderParams.length; i++) {
+      var p = sliderParams[i];
+      if (sliderParamMap[p] != undefined &&
+          xs.length >= p.length && xs.slice(0, p.length) == p) {
+        return PR_Success(AST_Variable(p, cxm), xs.slice(p.length));
+      }
+    }
+  }
+
+  /*} else if (xs.length >= sliderParamName.length && xs.slice(0,sliderParamName.length)
+      == sliderParamName) {
+    return PR_Success(AST_Variable(sliderParamName), xs.slice(sliderParamName.length))
+  }*/
+
+  return PR_Failure(xs)
+
+  // TODO: update for variables other than x and pi
+  // see rdp.js for original code
+}
+
+function flatten(xsList) {
+  var newXs = []
+  while (xsList.length > 0) {
+    var xs = xsList[0]
+    newXs = newXs.concat(xs)
+    xsList = xsList.slice(1)
+  }
+  return newXs
+}
+
+function unique(xs) {
+  var d = {}
+  var newXs = []
+  while (xs.length > 0) {
+    var x = xs[0]
+    if (d[x] == undefined) {
+      d[x] = true
+      newXs.push(x)
+    }
+    xs = xs.slice(1)
+  }
+  return newXs
+}
+
+function zip(xs, ys) {
+  var zs = []
+  while (xs.length > 0 && ys.length > 0) {
+    zs.push([xs[0], ys[0]])
+    xs = xs.slice(1)
+    ys = ys.slice(1)
+  }
+  return zs
+}
+
+// vectorize combinators
+var t1c = (f) => (tp) => f(tp[0]);
+var t2c = (f) => (tp) => f(tp[0], tp[1]);
+var vtz1 = (fmode,f) => (xs) => safeMap(fmode, f, xs);
+var vtz2 = (fmode,f) => (xs,ys) => safeMap(fmode, t2c(f), safeZip(fmode,xs,ys));
+var vtz1c = (fmode,f) => t1c(vtz1(fmode,f)); // w/ tuple-1 curry
+var vtz2c = (fmode,f) => t2c(vtz2(fmode,f)); // w/ tuple-2 curry
+var vtz1c_real = (f) => vtz1c(FAIL_REAL, f);
+var vtz1c_cplx = (f) => vtz1c(FAIL_CPLX, f);
+var vtz2c_real = (f) => vtz2c(FAIL_REAL, f);
+var vtz2c_cplx = (f) => vtz2c(FAIL_CPLX, f);
+var st1c = (fmode,f) => (tp) => safeApply(fmode, f, [tp[0]]); // tuple-1 curryl, safe
+var st2c = (fmode,f) => (tp) => safeApply(fmode, f, [tp[0], tp[1]]); // tuple-2 curry, safe
+var st1c_real = (f) => st1c(FAIL_REAL, f);
+var st1c_cplx = (f) => st1c(FAIL_CPLX, f);
+var st2c_real = (f) => st2c(FAIL_REAL, f);
+var st2c_cplx = (f) => st2c(FAIL_CPLX, f);
+
+// sinc needs to be before sin, etc.
+const BINFS_REAL = ['neg','pos','sqrt','sinc','sinh','sin','cosh','cos','exp','log',
+  'abs','floor','ceil','u','rect','tri','fftshift'];
+const BINFS_CPLX = BINFS_REAL.concat(['Re','Im','arg','fft','ifft']); // fft still before fftshift
+var binfs;
+
+const pickActualFnReal = {
+  '+': vtz2c_real((x,y) => Number(x)+Number(y)),
+  '-': vtz2c_real((x,y) => x-y),
+  '*': vtz2c_real((x,y) => x*y),
+  '/': vtz2c_real((x,y) => x/y),
+  '%': vtz2c_real((x,y) => mod(x,y)),
+  '^': vtz2c_real((x,y) => x**y),
+  'neg': vtz1c_real((x) => -x),
+  'pos': vtz1c_real((x) => +x),
+  'sqrt': vtz1c_real(Math.sqrt),
+  'sin': vtz1c_real(Math.sin),
+  'cos': vtz1c_real(Math.cos),
+  'exp': vtz1c_real(Math.exp),
+  'log': vtz1c_real(Math.log),
+  'abs': vtz1c_real(Math.abs),
+  'floor': vtz1c_real(Math.floor),
+  'ceil': vtz1c_real(Math.ceil),
+  'u': vtz1c_real((x) => (x < 0) ? 0 : 1),
+  'rect': vtz1c_real(rect),
+  'tri': vtz1c_real(tri),
+  'sinc': vtz1c_real(sinc),
+  'sinh': vtz1c_real(sinh),
+  'cosh': vtz1c_real(cosh),
+  '**': st2c_real(fcnvl_real),
+  'fftshift': st1c_real(fftshift)
+}
+
+const pickActualFnCplx = {
+  '+': vtz2c_cplx(cplxAdd),
+  '-': vtz2c_cplx(cplxSub),
+  '*': vtz2c_cplx(cplxMul),
+  '/': vtz2c_cplx(cplxDiv),
+  '%': vtz2c_cplx(cplxMod),
+  '^': vtz2c_cplx(cplxPow),
+  'neg': vtz1c_cplx(cplxNeg),
+  'pos': vtz1c_cplx(cplxPos),
+  'sqrt': vtz1c_cplx(cplxSqrt),
+  'sin': vtz1c_cplx(cplxSin),
+  'cos': vtz1c_cplx(cplxCos),
+  'exp': vtz1c_cplx(cplxExp),
+  'log': vtz1c_cplx(cplxLog),
+  'abs': vtz1c_cplx(cplxAbs),
+  'floor': vtz1c_cplx(cplxFloor),
+  'ceil': vtz1c_cplx(cplxCeil),
+  'u': vtz1c_cplx(cplxStep),
+  'rect': vtz1c_cplx(cplxRect),
+  'tri': vtz1c_cplx(cplxTri),
+  'sinc': vtz1c_cplx(cplxSinc),
+  'sinh': vtz1c_cplx(cplxSinh),
+  'cosh': vtz1c_cplx(cplxCosh),
+  '**': st2c_cplx(fcnvl),
+  'fftshift': st1c_cplx(fftshift),
+  'fft': st1c_cplx(fft),
+  'ifft': st1c_cplx(ifft),
+  // the following have no equivalents in real mode
+  'Re': vtz1c_cplx(Re),
+  'Im': vtz1c_cplx(Im),
+  'arg': vtz1c_cplx(cplxArg)
+}
+
+//var pickActualFn = (cxm) => (cxm == PARSE_REAL_MODE) ? pickActualFnReal : pickActualFnCplx;
+function pickActualFn(cxm) {
+  return (cxm == PARSE_REAL_MODE) ? pickActualFnReal : pickActualFnCplx;
+}
+
+function mod(x, y) {
+  var r = x % y;
+  if (x < 0)
+    r = (y+r)%y;
+  return r;
+}
+
+function rect(x) {
+  if (Math.abs(x) == 0.5) {
+    return 0.5;
+  } else if (Math.abs(x) < 0.5) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+function tri(x) {
+  if (Math.abs(x) >= 1) {
+    return 0;
+  } else if (x <= 0) {
+    return x + 1;
+  } else {
+    return 1 - x;
+  }
+}
+
+function sinc(x) {
+  return (x == 0) ? 1 : Math.sin(x)/x;
+}
+
+function replicate(n, x) {
+  var i;
+  var xs;
+  for (i = n, xs = []; i > 0; i--, xs.push(x));
+  return xs;
+}
+
+// now vectorized
+function astToFn(ast, vlen) {
+  if (ast.getType() == NUMBER) {
+    return [[], (_) => replicate(vlen, ast.getData())];
+  }
+
+  if (ast.getType() == VARIABLE) {
+    return [[ast.getData()], (x) => x[0]];
+  }
+
+  var childTuples = ast.getChildren().map((x) => astToFn(x, vlen));
+
+  // cvbs = childVarBindings
+  // [['a'], ['a', 'b'], ['b', 'c']]
+  var cvbs = childTuples.map((xs) => xs[0])
+
+  // ubs = unified bindings
+  // ['a', 'b', 'c']
+  var ubs = unique(flatten(cvbs))
+
+  // cvbis = childVarBindingIndexes
+  // [[0], [0, 1], [1, 2]]
+  var cvbis = cvbs.map((xs) => xs.map((x) => ubs.indexOf(x)))
+
+  var childFns = childTuples.map((xs) => xs[1])
+
+  // bfts = childVarBindingFunctionTuples
+  // [ [[0], <f1>], [[0,1], <f2>], [[1,2], <f3>] ]
+  var bfts = zip(cvbis, childFns)
+
+  var realFn = ast.getRealFn()
+
+  // unrolled version for debugging
+  /*function makeNewFn(bfts, realFn) {
+    function newFn(ps) {
+      var mbfts = [];
+      for (var i = 0; i < bfts.length; i++) {
+        var t = bfts[i];
+        var idxs = t[0];
+        var f = t[1];
+        var midxs = [];
+        for (var j = 0; j < idxs.length; j++) {
+          var idx = idxs[j];
+          midxs.push(ps[idx]);
+        }
+        var z = f(midxs);
+        mbfts.push(z);
+      }
+      return realFn(mbfts)
+    }
+    return newFn;
+  }
+  var newFn = makeNewFn(bfts, realFn);*/
+
+  var makeNewFn = (bfts, realFn) =>
+    (ps) => realFn(bfts.map((t) => t[1](t[0].map((i) => ps[i]))));
+
+  var newFn = makeNewFn(bfts, realFn)
+
+  // doesn't work due to scoping issue:
+  //newFn = (ps) => realFn(bfts.map((t) => t[1](t[0].map((i) => ps[i]))))
+
+  var ret = [ubs, newFn]
+  return ret
+}
+
+function evalFn(bindSet, fn) {
+  var bindOrder = fn[0]
+  var actualFn = fn[1]
+  var args = bindOrder.map((x) => bindSet[x])
+  var res = actualFn(args)
+  return res
+}
+
+// end of rdp.js direct import
+
+// start of fft.js direct import
+function cplx(re, im) {
+  return [re, im];
+}
+var j = cplx(0, 1);
+
+function cplxFromReal(re) {
+  return [re, 0];
+}
+var cpi = cplxFromReal(Math.PI);
+
+function cplxFromPair(p) {
+  return p;
+}
+
+function cplxAdd(z1, z2) {
+  return cplx(z1[0] + z2[0], z1[1] + z2[1]);
+}
+
+function cplxSub(z1, z2) {
+  return cplx(z1[0] - z2[0], z1[1] - z2[1]);
+}
+
+function cplxMul(z1, z2) {
+  var a = z1[0];
+  var b = z1[1];
+  var c = z2[0];
+  var d = z2[1];
+  var re = a*c - b*d;
+  var im = b*c + a*d;
+  var res = cplx(re, im);
+  return cplx(re, im);
+}
+
+function cplxDiv(z1, z2) {
+  var a = z1[0];
+  var b = z1[1];
+  var c = z2[0];
+  var d = z2[1];
+  var dn = c*c + d*d;
+  var re = (a*c + b*d) / dn;
+  var im = (b*c - a*d) / dn;
+  return cplx(re, im);
+}
+
+// e^(x + iy)
+// e^x e^(iy)
+// e^x (cos(y) + i sin(y))
+function cplxExp(z) {
+  var x = z[0];
+  var y = z[1];
+  var ex = Math.exp(x);
+  var re = ex * Math.cos(y);
+  var im = ex * Math.sin(y);
+  return cplx(re, im);
+}
+
+// from definition, O(n^2), used in base case of fft
+function dft_generic(xs, inverse) {
+  var N = xs.length;
+  var ys = [];
+  for (var k = 0; k < N; k++) {
+    var acc = cplxFromReal(0);
+    for (var n = 0; n < N; n++) {
+      var n0 = inverse ? 2 : (-2);
+      var n1 = cplxFromReal(n0);
+      var n2 = cplxMul(n1, cpi);
+      var n3 = cplxMul(n2, j);
+      var n4 = cplxFromReal(n);
+      var n5 = cplxMul(n3, n4);
+      var n6 = cplxFromReal(k);
+      var n7 = cplxMul(n5, n6);
+      var n8 = cplxFromReal(N);
+      var n9 = cplxDiv(n7, n8);
+      var n10 = cplxExp(n9);
+      var n11 = cplxFromPair(xs[n]);
+      var n12 = cplxMul(n11, n10);
+      var n13 = cplxAdd(acc, n12);
+      acc = n13;
+    }
+    ys.push(acc);
+  }
+
+  // scaling for inverse only
+  if (inverse) { ys = inverseScale(N, ys); }
+
+  return ys;
+}
+
+function dft(xs) {
+  return dft_generic(xs, false);
+}
+function idft(xs) {
+  return dft_generic(xs, true);
+}
+
+function separateOddsEvens(xs) {
+  var evens = [];
+  var odds = [];
+
+  for (var i = 0; i < xs.length - 1; i += 2) {
+    evens.push(xs[i]);
+    odds.push(xs[i+1]);
+  }
+
+  return [evens, odds];
+}
+
+// ingenious hack from:
+// https://stackoverflow.com/questions/108318/how-can-i-test-whether-a-number-is-a-power-of-2#108360
+function isPowerOfTwo(x) {
+  return x > 0 && (x & (x-1)) == 0;
+}
+
+function fft_generic(xs, inverse) {
+  var N = xs.length;
+
+  // fail if N is not power of 2
+  if (!isPowerOfTwo(N)) {
+    console.log('fft failed, input length is ' + N + ', must be power of 2');
+    return;
+  }
+
+  // base case: do a brute force dft on length 2
+  if (xs.length == 2)
+    return dft_generic(xs, inverse);
+
+  var ys_half1 = [];
+  var ys_half2 = [];
+
+  var [evens, odds] = separateOddsEvens(xs);
+
+  var Es = fft_generic(evens, inverse);
+  var Os = fft_generic(odds, inverse);
+
+  for (var k = 0; k < (N >> 1); k++) {
+    var n0 = inverse ? 2 : (-2);
+    var n1 = cplxFromReal(n0);
+    var n2 = cplxMul(n1, cpi);
+    var n3 = cplxMul(n2, j);
+    var n4 = cplxFromReal(k);
+    var n5 = cplxMul(n3, n4);
+    var n6 = cplxFromReal(N);
+    var n7 = cplxDiv(n5, n6);
+    var R = cplxExp(n7);
+    var Ek = Es[k];
+    var Ok = Os[k];
+    var ROk = cplxMul(R, Ok);
+    var yk1 = cplxAdd(Ek, ROk);
+    var yk2 = cplxSub(Ek, ROk);
+    ys_half1.push(yk1);
+    ys_half2.push(yk2);
+  }
+
+  var ys = ys_half1.concat(ys_half2);
+
+  // scaling for inverse only
+  if (inverse) { ys = inverseScale(2, ys); } // by 2, not N
+
+  return ys;
+}
+
+// still ew
+function inverseScale(N, ys) {
+  var n1 = cplxFromReal(1);
+  var n2 = cplxFromReal(N);
+  var c = cplxDiv(n1, n2);
+  return ys.map(z => cplxMul(z, c));
+}
+
+function fft(xs) {
+  return fft_generic(xs, false);
+}
+function ifft(xs) {
+  return fft_generic(xs, true);
+}
+
+// this is not cnvl, this is actually cyclic cnvl
+// see https://www.matecdev.com/posts/julia-fft-convolution.html
+function fcnvl_cyclic(xs, ys) {
+  var xs_fs = fft(xs);
+  var ys_fs = fft(ys);
+  var zs_fs = zip(xs_fs, ys_fs).map(t2c(cplxMul));
+  var zs = ifft(zs_fs);
+  return zs;
+}
+
+function zeros(n) {
+  var zs;
+  for (zs = []; n > 0; n--, zs.push(0));
+  return zs;
+}
+
+function fcnvl(xs, ys) {
+  var N = xs.length;
+  var M = ys.length;
+  var ys_pad = ys.concat(zeros(N).map(cplxFromReal)); // should be N-1...
+  var xs_pad = xs.concat(zeros(M).map(cplxFromReal)); // should be M-1...
+  var zs = fcnvl_cyclic(xs_pad, ys_pad);
+  // now only take the "middle"
+  var L = zs.length;
+  var fin = zs.slice(L>>2, L-(L>>2)); // agh
+  return fin;
+}
+
+function fcnvl_real(xs, ys) {
+  var xsc = xs.map(cplxFromReal);
+  var ysc = ys.map(cplxFromReal);
+  var zs = fcnvl(xsc, ysc).map(p => p[0]);
+  return zs;
+}
+
+function norm(z) {
+  return Math.sqrt(z[0]**2 + z[1]**2);
+}
+
+// end of fft.js direct import
+
+// additional complex functions
+function cplxAbs(z) {
+  return cplxFromReal(norm(z));
+}
+
+function cplxMod(z1, z2) {
+  var a = z1[0];
+  var b = z1[1];
+  var c = z2[0];
+  // imag part of z2 discarded
+
+  var re = mod(a, c);
+  var im = mod(b, c); // makes physical sense? maybe??
+  return cplx(re, im);
+}
+
+function cplxLog(z) {
+  var re = Math.log(norm(z));
+  var im = phase(z);
+  return cplx(re, im);
+}
+
+function cplxEq(z1, z2) {
+  return z1[0] == z2[0] && z1[1] == z2[1];
+}
+
+// z1^z2 = exp(log(z1^z2)) = exp(z2 * log(z1))
+// some caveats:
+// 0^z is not defined in general, so it's okay to let it go to NaN
+// however, we do want it to fall back to real exponentiation if z is purely real
+// so 0^r == 0, except 0^0 == 1
+// (this won't work without explicit handling b/c 0^z = exp(z * log(0)) )
+// the case z^0 should be handled already for z != 0
+function cplxPow(z1, z2) {
+  if (cplxEq(z1, [0,0])) {
+    if (cplxEq(z2, [0,0])) {
+      return cplxFromReal(1);
+    } else if (z2[1] == 0) {
+      return cplxFromReal(0);
+    }
+  }
+
+  return cplxExp(cplxMul(z2, cplxLog(z1)));
+}
+
+function cplxNeg(z) {
+  return cplx(-z[0], -z[1]);
+}
+
+function cplxPos(z) {
+  return cplx(+z[0], +z[1]);
+}
+
+function cplxSqrt(z) {
+  var half = cplxFromReal(0.5);
+  var res = cplxPow(z, half);
+  return res;
+}
+
+// cos(ix) = (1/2)(exp(i*ix) + exp(-i*ix)) = (1/2)(exp(-x) + exp(x)) = cosh(x)
+// sin(ix) = (1/(2i))(exp(i*ix) - exp(-i*ix)) = (-i/2)(exp(-x) - exp(x)) =
+//  = (i/2)(exp(x) - exp(-x)) = i*sinh(x)
+function cosh(x) {
+  return 0.5*(Math.exp(x) + Math.exp(-x));
+}
+
+function sinh(x) {
+  return 0.5*(Math.exp(x) - Math.exp(-x));
+}
+
+function cplxCosh(z) {
+  var h = cplxFromReal(0.5);
+  var n1 = cplxExp(z);
+  var n2 = cplxExp(cplxNeg(z));
+  var n3 = cplxAdd(n1, n2);
+  var res = cplxMul(h, n3);
+  return res;
+}
+
+function cplxSinh(z) {
+  var h = cplxFromReal(0.5);
+  var n1 = cplxExp(z);
+  var n2 = cplxExp(cplxNeg(z));
+  var n3 = cplxSub(n1, n2);
+  var res = cplxMul(h, n3);
+  return res;
+}
+
+// sin(x + iy)
+// sin(x)cos(iy) + cos(x)sin(iy)
+// sin(x)cosh(y) + i cos(x)sinh(y)
+function cplxSin(z) {
+  var x = z[0];
+  var y = z[1];
+  var re = Math.sin(x) * cosh(y);
+  var im = Math.cos(x) * sinh(y);
+  return cplx(re, im);
+}
+
+// cos(x + iy)
+// cos(x)cos(iy) - sin(x)sin(iy)
+// cos(x)cosh(y) - i sin(x)sinh(y)
+function cplxCos(z) {
+  var x = z[0];
+  var y = z[1];
+  var re = Math.cos(x) * cosh(y);
+  var im = -Math.sin(x) * sinh(y);
+  return cplx(re, im);
+}
+
+// only real part gets affected
+function cplxFloor(z) {
+  return cplx(Math.floor(z[0]), z[1]);
+}
+
+function cplxCeil(z) {
+  return cplx(Math.ceil(z[0]), z[1]);
+}
+
+// left half plane is mapped to zero, right to one
+function cplxStep(z) {
+  var x = z[0];
+  var re = x < 0 ? 0 : 1;
+  return cplxFromReal(re);
+}
+
+// you know the deal, imaginary part doesn't matter
+function cplxRect(z) {
+  var re = rect(z[0]);
+  return cplxFromReal(re);
+}
+
+function cplxTri(z) {
+  var re = tri(z[0]);
+  return cplxFromReal(re);
+}
+
+// bit more involved
+function cplxSinc(z) {
+  if (z[0] == 0) {
+    return cplxFromReal(1);
+  } else {
+    var n1 = cplxSin(z);
+    var res = cplxDiv(n1, z)
+    return res;
+  }
+}
+
+function cplxArg(z) {
+  return cplxFromReal(phase(z));
+}
+
+function Re(z) {
+  return cplxFromReal(z[0]);
+}
+
+function Im(z) {
+  return cplxFromReal(z[1]);
+}
+
+function initPlotModes() {
+  plot1XAxisOn = true;
+  plot1YAxisOn = true;
+  plot1CurveMode = true;
+  plot1StemMode = false;
+  plot1PointMode = false;
+  plot1BoundsOn = true;
+  plot1ScaleToFit = false;
+
+  plot2XAxisOn = true;
+  plot2YAxisOn = true;
+  plot2CurveMode = true;
+  plot2StemMode = false;
+  plot2PointMode = false;
+  plot2BoundsOn = true;
+  plot2ScaleToFit = false;
+
+  document.getElementById("plot1CurveMode").checked = plot1CurveMode;
+  document.getElementById("plot1StemMode").checked = plot1StemMode;
+  document.getElementById("plot1PointMode").checked = plot1PointMode;
+  document.getElementById("plot1XAxisOn").checked = plot1XAxisOn;
+  document.getElementById("plot1YAxisOn").checked = plot1YAxisOn;
+  document.getElementById("plot1BoundsOn").checked = plot1BoundsOn;
+  document.getElementById("plot1ScaleToFit").checked = plot1ScaleToFit;
+
+  document.getElementById("plot2CurveMode").checked = plot2CurveMode;
+  document.getElementById("plot2StemMode").checked = plot2StemMode;
+  document.getElementById("plot2PointMode").checked = plot2PointMode;
+  document.getElementById("plot2XAxisOn").checked = plot2XAxisOn;
+  document.getElementById("plot2YAxisOn").checked = plot2YAxisOn;
+  document.getElementById("plot2BoundsOn").checked = plot2BoundsOn;
+  document.getElementById("plot2ScaleToFit").checked = plot2ScaleToFit;
+}
+
+function updateWinSize(val) {
+  winSize = val;
+  document.getElementById('winSize').value = val;
+  document.getElementById('winSizeDisplay').textContent = '' + val + '%';
+  document.getElementById('wrapper').style.maxWidth = val + '%';
+}
+
+function handleWinSizeUpdate() {
+  var val = document.getElementById('winSize').value;
+  updateWinSize(val);
+  updatePlotDimensions();
+  resizePlots();
+  updateAndRedrawPlots();
+}
+
+function updateRevFreqMode() {
+  revFreqMode = document.getElementById('revFreqMode').checked;
+}
+
+function updateRevFreqModeAndPlots() {
+  updateRevFreqMode();
+  updateAndRedrawPlots();
+}
+
+function updateFdMode() {
+  fdMode = document.getElementById('fdMode').value;
+  var button = document.getElementById('fdPartsTop');
+
+  if (fdMode == PARTS_MODE) {
+    button.style.display = 'unset';
+    button.textContent = 'Real part in front / cursor focus (click to toggle)';
+    fdPartsTop = REAL;
+  } else if (fdMode == MAGNI_MODE) {
+    button.style.display = 'none';
+  }
+  updateAndRedrawPlots();
+}
+
+function updateTdMode() {
+  tdMode = document.getElementById('tdMode').value;
+  var button = document.getElementById('tdPartsTop');
+
+  if (tdMode == PARTS_MODE) {
+    button.style.display = 'unset';
+    button.textContent = 'Real part in front / cursor focus (click to toggle)';
+    tdPartsTop = REAL;
+  } else if (tdMode == MAGNI_MODE || tdMode == REAL_ONLY_MODE) {
+    button.style.display = 'none';
+  }
+
+  if (tdMode == PARTS_MODE || tdMode == MAGNI_MODE) {
+    binfs = BINFS_CPLX;
+  } else if (tdMode == REAL_ONLY_MODE) {
+    binfs = BINFS_REAL;
+  }
+
+  //updateAndRedrawPlots();
+  updateInputFunctionAndPlots();
+}
+
+function updateFilterDisplayMode() {
+  filterDisplayMode = document.getElementById('filterDisplayMode').value;
+  //console.log('DEBUG: filterDisplayMode: ' + filterDisplayMode);
+}
+
+function updateFilterMode() {
+  var val = document.getElementById('filterMode').value;
+  if (val == NO_CHANGE) {
+    return;
+  }
+
+  // even if filterMode is the same as before, still need to update because this routine
+  // can be called e.g. if sample count is changed
+  filterMode = val;
+
+  // remove existing sliders
+  document.getElementById('filterSliderList').innerHTML = '';
+
+  if (filterMode == FILTER_OFF) {
+    return;
+  }
+
+  var hsc = sc / 2;
+ 
+  // couldn't get hash table to work, so have these ifs
+  if (filterMode == SYM_LOW_PASS) {
+    addFilterSlider(SYM_LOW_PASS, 'Frequency cutoff:', 0, hsc);
+  } else if (filterMode == SYM_HIGH_PASS) {
+    addFilterSlider(SYM_HIGH_PASS, 'Frequency cutoff:', 0, hsc);
+  } else if (filterMode == SYM_BAND_PASS) {
+    addFilterSlider(SYM_BAND_PASS_START, 'Band start frequency:', 0, hsc);
+    addFilterSlider(SYM_BAND_PASS_WIDTH, 'Band width:', 0, hsc);
+  } else if (filterMode == SYM_BAND_STOP) {
+    addFilterSlider(SYM_BAND_STOP_START, 'Band start frequency:', 0, hsc);
+    addFilterSlider(SYM_BAND_STOP_WIDTH, 'Band width:', 0, hsc);
+
+  } else if (filterMode == ASYM_LOW_PASS) {
+    addFilterSlider(ASYM_LOW_PASS, 'Frequency cutoff:', -hsc, hsc - 1);
+  } else if (filterMode == ASYM_HIGH_PASS) {
+    addFilterSlider(ASYM_HIGH_PASS, 'Frequency cutoff:', -hsc, hsc - 1);
+  } else if (filterMode == ASYM_BAND_PASS) {
+    addFilterSlider(ASYM_BAND_PASS_START, 'Band start frequency:', -hsc, hsc - 1);
+    addFilterSlider(ASYM_BAND_PASS_WIDTH, 'Band width:', 0, sc - 1);
+  } else if (filterMode == ASYM_BAND_STOP) {
+    addFilterSlider(ASYM_BAND_STOP_START, 'Band start frequency:', -hsc, hsc - 1);
+    addFilterSlider(ASYM_BAND_STOP_WIDTH, 'Band width:', 0, sc - 1);
+  }
+
+  updateAndRedrawPlots();
+}
+
+function addFilterSlider(param, labelText, lb, ub) {
+  var sval = 0;
+  var stepCount = FILTER_SLIDER_STEP_COUNT_DEFAULT;
+
+  // if already initialized, load now
+  if (Object.keys(filterParamMap[param]).length > 0) {
+    sval = filterParamMap[param]['Value'];
+    stepCount = filterParamMap[param]['StepCount'];
+  }
+
+  var newDiv = document.createElement('div');
+  newDiv.id = 'filterSliderDiv_' + param;
+
+  var label = document.createElement('label');
+  label.innerHTML = labelText + ' ';
+  newDiv.appendChild(label);
+
+  var slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = 0;
+  slider.max = FILTER_SLIDER_STEP_COUNT_DEFAULT;
+  slider.step = 1;
+  slider.value = sval;
+  slider.id = 'filterSlider_' + param;
+  slider.classList.add('filterSlider'); // needed to find from its parent
+  slider.oninput = function () { updateFilterSlider(newDiv) };
+  newDiv.appendChild(slider);
+
+  var sep_1 = document.createElement('span');
+  sep_1.innerHTML = ' ';
+  newDiv.append(sep_1);
+
+  var fsDisp = document.createElement('label');
+  fsDisp.classList.add('filterSliderDisplay');
+  newDiv.appendChild(fsDisp);
+
+  var sep_2 = document.createElement('span');
+  sep_2.innerHTML = ' | ';
+  newDiv.appendChild(sep_2);
+
+  var stepLabel = document.createElement('label');
+  stepLabel.innerHTML = 'Steps: ';
+  newDiv.appendChild(stepLabel);
+
+  var stepCountInput = document.createElement('input');
+  stepCountInput.classList.add('short');
+  stepCountInput.classList.add('filterSliderStepCountInput');
+  stepCountInput.onkeyup = function() { updateFilterSliderStepCount(newDiv); }
+  stepCountInput.value = stepCount;
+  newDiv.appendChild(stepCountInput);
+  filterParamMap[param]['StepCount'] = stepCountInput.value;
+
+  var sep_3 = document.createElement('span');
+  sep_3.innerHTML = ' ';
+  newDiv.appendChild(sep_3);
+
+  var stepCountError = document.createElement('label');
+  stepCountError.classList.add('filterSliderStepCountError');
+  stepCountError.textContent = '';
+  newDiv.appendChild(stepCountError);
+
+  // these are fixed from initialization
+  filterParamMap[param]['RangeLB'] = lb;
+  filterParamMap[param]['RangeUB'] = ub;
+
+  document.getElementById('filterSliderList').appendChild(newDiv);
+
+  updateFilterSlider(newDiv);
+}
+
+function updateFilterSlider(sliderDiv) {
+  var paramName = sliderDiv.id.slice('filterSliderDiv_'.length);
+  var slider = sliderDiv.getElementsByClassName('filterSlider')[0];
+  var sVal = Number(slider.value);
+  filterParamMap[paramName]['Value'] = sVal;
+
+  // calc paramValue
+  var lb = filterParamMap[paramName]['RangeLB'];
+  var ub = filterParamMap[paramName]['RangeUB'];
+  var stepCount = filterParamMap[paramName]['StepCount'];
+
+  var range = ub - lb;
+  var pcnt = sVal / stepCount;
+  var pVal = lb + pcnt * range;
+
+  filterParamMap[paramName]['ParamValue'] = pVal;
+
+  // edit display text
+  var disp = sliderDiv.getElementsByClassName('filterSliderDisplay')[0];
+  disp.innerHTML = '[' + pVal.toFixed(5) + '] (step: ' + sVal + '/' + stepCount + ')';
+
+  updateAndRedrawPlots();
+}
+
+function updateFilterSliderStepCount(sliderDiv) {
+  var stepCountError = sliderDiv.getElementsByClassName('filterSliderStepCountError')[0];
+
+  var r = Number(sliderDiv.getElementsByClassName('filterSliderStepCountInput')[0].value);
+  if (isNaN(r) || !Number.isInteger(r) || r <= 0) {
+    var errMsg = 'step count error: needs to be positive integer';
+    stepCountError.innerHTML = errMsg;
+    return;
+  }
+
+  var paramName = sliderDiv.id.slice('filterSliderDiv_'.length);
+  filterParamMap[paramName]['StepCount'] = r;
+
+  stepCountError.textContent = '';
+
+  var slider = sliderDiv.getElementsByClassName('filterSlider')[0];
+  slider.max = r;
+  slider.value = 0;
+
+  updateFilterSlider(sliderDiv);
+}
+
+// new contender for the most indecipherable routine of all time
+function drawFilterOverlay(plot, boundsOn) {
+  // copied from scalePts_I, don't ask how it works
+  var pad = calcPad(boundsOn);
+  var cnvZeroX = ((sc * 0.5) / (sc - 1)) * (plot_width * vw - 2 * pad) + pad;
+
+  // the following line is unholy, but it works
+  // (it scales from pure space to display space)
+  var idfk = (dx) => (dx / (sc / 2)) * (plot_width * vw - 2 * pad) * ((sc/2) /(sc - 1));
+
+  if (filterMode == SYM_LOW_PASS || filterMode == SYM_HIGH_PASS) {
+    var dx = filterParamMap[filterMode]['ParamValue'];
+
+    var cnvDx = idfk(dx);
+
+    var cnvX_L = cnvZeroX - cnvDx;
+    var cnvX_R = cnvZeroX + cnvDx;
+
+    drawLine(plot, cnvX_L, 0, cnvX_L, plot_height * vw, 'rgb(0,255,0)', 1);
+
+    if (dx <= sc/2 - 1) {
+      drawLine(plot, cnvX_R, 0, cnvX_R, plot_height * vw, 'rgb(0,255,0)', 1);
+    }
+
+    if (filterMode == SYM_LOW_PASS) {
+      var blockWidth = idfk(sc/2 - dx);
+      var blockWidthR = idfk(sc/2 - dx - 1); // ???
+
+      drawRectFromCorner(plot, TOP_LEFT, pad, 0, blockWidth, plot_height * vw,
+        'rgba(0,0,0,0)', 1, true, 'rgba(0,255,0,0.2)');
+      if (dx <= sc/2 - 1) {
+        drawRectFromCorner(plot, TOP_RIGHT, plot_width*vw - pad, 0, blockWidthR,
+          plot_height*vw, 'rgba(0,0,0,0)', 1, true, 'rgba(0,255,0,0.2)');
+      }
+    } else if (filterMode == SYM_HIGH_PASS) {
+      var blockWidth;
+      if (dx <= sc/2 - 1) {
+        blockWidth = cnvDx * 2;
+      } else {
+        blockWidth = cnvDx + idfk(sc/2 - 1);
+      }
+      drawRectFromCorner(plot, TOP_LEFT, cnvX_L, 0, blockWidth, plot_height*vw,
+        'rgba(0,0,0,0)', 1, true, 'rgba(0,255,0,0.2)');
+    }
+
+  } else if (filterMode == SYM_BAND_PASS || filterMode == SYM_BAND_STOP) {
+    var start = filterParamMap[filterMode + '_start']['ParamValue'];
+    var width = filterParamMap[filterMode + '_width']['ParamValue'];
+
+    var cnvStart = idfk(start);
+    var cnvWidth = idfk(width);
+
+    var cnvLeftBandStart = cnvZeroX - cnvStart;
+    var cnvLeftBandEnd = cnvLeftBandStart - cnvWidth;
+    var cnvRightBandStart = cnvZeroX + cnvStart;
+    var cnvRightBandEnd = cnvRightBandStart + cnvWidth;
+
+    [cnvLeftBandStart, cnvLeftBandEnd, cnvRightBandStart, cnvRightBandEnd].forEach(function(v) {
+      if ((v <= cnvZeroX + idfk(sc/2 - 1)) && (v >= cnvZeroX - idfk(sc/2))) {
+        drawLine(plot, v, 0, v, plot_height*vw, 'rgb(0,255,0)', 1);
+      }
+    });
+
+    var outerWidth = cnvStart + cnvWidth;
+    if (filterMode == SYM_BAND_PASS) {
+      var bw1 = idfk(sc)/2 - outerWidth;
+      if (outerWidth <= idfk(sc/2)) {
+        drawRectFromCorner(plot, TOP_RIGHT, cnvLeftBandEnd, 0, bw1,
+          plot_height*vw, 'rgba(0,0,0,0)', 1, true, 'rgba(0,255,0,0.2)');
+      }
+
+      var bw2 = cnvStart*2;
+      drawRectFromCorner(plot, TOP_LEFT, cnvLeftBandStart, 0, bw2,
+        plot_height*vw, 'rgba(0,0,0,0)', 1, true, 'rgba(0,255,0,0.2)');
+
+      var bw3 = idfk(sc/2 - 1) - outerWidth;
+      if (outerWidth <= idfk(sc/2 - 1)) {
+        drawRectFromCorner(plot, TOP_LEFT, cnvRightBandEnd, 0, bw3,
+          plot_height*vw, 'rgba(0,0,0,0)', 1, true, 'rgba(0,255,0,0.2)');
+      }
+    } else if (filterMode == SYM_BAND_STOP) {
+      var bw1 = (outerWidth > idfk(sc/2)) ? (idfk(sc/2) - cnvStart) : cnvWidth;
+      drawRectFromCorner(plot, TOP_RIGHT, cnvLeftBandStart, 0, bw1, plot_height*vw,
+        'rgba(0,0,0,0)', 1, true, 'rgba(0,255,0,0.2)');
+
+      if (cnvStart <= idfk(sc/2 - 1)) {
+        var bw2 = (outerWidth > idfk(sc/2 - 1)) ? (idfk(sc/2 - 1) - cnvStart) : cnvWidth;
+        drawRectFromCorner(plot, TOP_LEFT, cnvRightBandStart, 0, bw2, plot_height*vw,
+          'rgba(0,0,0,0)', 1, true, 'rgba(0,255,0,0.2)');
+      }
+    }
+
+  } else if (filterMode == ASYM_LOW_PASS || filterMode == ASYM_HIGH_PASS) {
+    var dx = filterParamMap[filterMode]['ParamValue'];
+    var cnvDx = idfk(dx);
+    var cnvCo = cnvZeroX + cnvDx
+
+    drawLine(plot, cnvCo, 0, cnvCo, plot_height * vw, 'rgb(0,255,0)', 1);
+
+    if (filterMode == ASYM_LOW_PASS) {
+      var stop = cnvZeroX + idfk(sc/2 - 1);
+      var bw = stop - cnvCo;
+      drawRectFromCorner(plot, TOP_LEFT, cnvCo, 0, bw, plot_height*vw, 'rgba(0,0,0,0)', 1,
+        true, 'rgba(0,255,0,0.2)');
+    } else if (filterMode == ASYM_HIGH_PASS) {
+      var stop = cnvZeroX - idfk(sc/2);
+      var bw = cnvCo - stop;
+      drawRectFromCorner(plot, TOP_RIGHT, cnvCo, 0, bw, plot_height*vw, 'rgba(0,0,0,0)', 1,
+        true, 'rgba(0,255,0,0.2)');
+    }
+
+  } else if (filterMode == ASYM_BAND_PASS || filterMode == ASYM_BAND_STOP) {
+    var start = filterParamMap[filterMode + '_start']['ParamValue'];
+    var width = filterParamMap[filterMode + '_width']['ParamValue'];
+
+    var cnvStart = idfk(start);
+    var cnvWidth = idfk(width);
+    var cnvL = cnvZeroX + cnvStart;
+    var cnvR = cnvL + cnvWidth;
+
+    drawLine(plot, cnvL, 0, cnvL, plot_height * vw, 'rgb(0,255,0)', 1);
+    if (cnvR <= cnvZeroX + idfk(sc/2 - 1)) {
+      drawLine(plot, cnvR, 0, cnvR, plot_height * vw, 'rgb(0,255,0)', 1);
+    }
+
+    var cnvLimitR = cnvZeroX + idfk(sc/2 - 1);
+
+    if (filterMode == ASYM_BAND_PASS) {
+      //var bw1 = idfk(sc - (sc/2 - start));
+      var bw1 = idfk(sc/2 + start);
+      drawRectFromCorner(plot, TOP_RIGHT, cnvL, 0, bw1, plot_height*vw, 'rgba(0,0,0,0)', 1,
+        true, 'rgba(0,255,0,0.2)');
+
+      if (cnvR <= cnvLimitR) {
+        var bw2 = idfk(sc/2 - 1 - (start + width));
+        drawRectFromCorner(plot, TOP_LEFT, cnvR, 0, bw2, plot_height*vw, 'rgba(0,0,0,0)', 1,
+          true, 'rgba(0,255,0,0.2)');
+      }
+
+    } else if (filterMode == ASYM_BAND_STOP) {
+      var bw = (cnvR <= cnvLimitR) ? cnvWidth : (cnvLimitR - cnvL);
+      drawRectFromCorner(plot, TOP_LEFT, cnvL, 0, bw, plot_height*vw, 'rgba(0,0,0,0)', 1,
+        true, 'rgba(0,255,0,0.2)');
+    }
+  }
+
+}
+
+// the lte is to include zero frequency...
+// a <= x < b
+function inRange(x, a, b) {
+  return x >= a && x < b;
+}
+
+function applyFilter() {
+  var filter;
+  if (filterMode == SYM_LOW_PASS || filterMode == SYM_HIGH_PASS || filterMode == ASYM_LOW_PASS
+      || filterMode == ASYM_HIGH_PASS) {
+    var coval = filterParamMap[filterMode]['ParamValue']; // cutoff val
+
+    if (filterMode == SYM_LOW_PASS) {
+      filter = (p) => (Math.abs(p[0]) <= coval) ? p : [p[0], cplxFromReal(0)];
+    } else if (filterMode == SYM_HIGH_PASS) {
+      filter = (p) => (Math.abs(p[0]) >= coval) ? p : [p[0], cplxFromReal(0)];
+    } else if (filterMode == ASYM_LOW_PASS) {
+      filter = (p) => (p[0] <= coval) ? p : [p[0], cplxFromReal(0)];
+    } else if (filterMode == ASYM_HIGH_PASS) {
+      filter = (p) => (p[0] >= coval) ? p : [p[0], cplxFromReal(0)];
+    }
+  } else if (filterMode == SYM_BAND_PASS || filterMode == SYM_BAND_STOP 
+             || filterMode == ASYM_BAND_PASS || filterMode == ASYM_BAND_STOP) {
+    var start = filterParamMap[filterMode + '_start']['ParamValue'];
+    var width = filterParamMap[filterMode + '_width']['ParamValue'];
+
+    if (filterMode == SYM_BAND_PASS) {
+      filter = (p) => inRange(Math.abs(p[0]), start, start+width) ? p : [p[0], cplxFromReal(0)];
+    } else if (filterMode == SYM_BAND_STOP) {
+      filter = (p) => !inRange(Math.abs(p[0]), start, start+width) ? p : [p[0], cplxFromReal(0)];
+    } else if (filterMode == ASYM_BAND_PASS) {
+      filter = (p) => inRange(p[0], start, start+width) ? p : [p[0], cplxFromReal(0)];
+    } else if (filterMode == ASYM_BAND_STOP) {
+      filter = (p) => !inRange(p[0], start, start+width) ? p : [p[0], cplxFromReal(0)];
+    }
+  }
+
+  ftr_FDPs = FDPs.map(filter);
+  ftr_FDPs_Ms = ftr_FDPs.map(p => [p[0], norm(p[1])]);
+  ftr_FDPs_Ps = ftr_FDPs.map(p => [p[0], phase(p[1])]);
+  ftr_FDPs_Rs = ftr_FDPs.map(p => [p[0], p[1][0]]);
+  ftr_FDPs_Is = ftr_FDPs.map(p => [p[0], p[1][1]]);
+
+  var fs0 = ftr_FDPs.map(p => p[1]);
+  // need to (inverse) fftshift! see link mentioned at beginning of script
+  var fs = revFreqMode ? fftshift(fs0) : fs0;
+  var ifs = fftshift(ifft(fs));
+  var ms = ifs.map(norm);
+  var ps = ifs.map(phase);
+  var rs = ifs.map(p => p[0]);
+  var is = ifs.map(p => p[1]);
+
+  var tdps = (TDPs != undefined) ? TDPs : CPLX_TDPs;
+  var ts = tdps.map(p => p[0]);
+
+  ftr_CPLX_TDPs = zip(ts, ifs);
+  ftr_CPLX_TDPs_Ms = zip(ts, ms);
+  ftr_CPLX_TDPs_Ps = zip(ts, ps);
+  ftr_CPLX_TDPs_Rs = zip(ts, rs);
+  ftr_CPLX_TDPs_Is = zip(ts, is);
+
+  // real only ones
+  ftr_TDPs = zip(ts, ifs.map(p => p[0]));
+}
+
+function capitalize(word) {
+  if (word.length == 0) return '';
+  return String.fromCharCode(word.charCodeAt(0)-0x20) + word.slice(1);
+}
+
+function handleFormToggle(form) {
+  showForm[form] = !showForm[form];
+  updateForm(form);
+}
+
+function updateForm(form) {
+  var button = document.getElementById('toggle' + capitalize(form));
+  var hiddenElems = Array.from(document.getElementsByClassName(form + 'Hidden'));
+  if (showForm[form]) {
+    button.textContent = '>> Hide ' + form + ' interface <<';
+    hiddenElems.forEach(function(e) { e.style.display = 'block'; });
+  } else {
+    button.textContent = 'Show ' + form + ' interface';
+    hiddenElems.forEach(function(e) { e.style.display = 'none'; });
+  }
+}
+
+function init() {
+  // needs to be first
+  document.getElementById('tdMode').value = REAL_ONLY_MODE;
+  updateTdMode();
+
+  document.getElementById('fdMode').value = MAGNI_MODE;
+  updateFdMode();
+
+  initSlider();
+
+  document.getElementById('sampleCount').value = DEFAULT_SAMPLE_COUNT;
+  updateSampleCount();
+  initPlotModes();
+
+  updateWinSize(DEFAULT_WINSIZE);
+
+  document.getElementById('functionInput').value = '';
+  updateInputFunction();
+
+  document.getElementById('sampleBoundLower').value = DEFAULT_SAMPLE_BOUND_LOWER;
+  updateSampleBound('lower');
+  document.getElementById('sampleBoundUpper').value = DEFAULT_SAMPLE_BOUND_UPPER;
+  updateSampleBound('upper');
+
+  document.getElementById('revFreqMode').checked = true;
+  updateRevFreqMode();
+
+  [SYM_LOW_PASS, SYM_HIGH_PASS, SYM_BAND_PASS_START, SYM_BAND_PASS_WIDTH, SYM_BAND_STOP_START,
+   SYM_BAND_STOP_WIDTH, ASYM_LOW_PASS, ASYM_HIGH_PASS, ASYM_BAND_PASS_START, ASYM_BAND_PASS_WIDTH,
+   ASYM_BAND_STOP_START, ASYM_BAND_STOP_WIDTH].forEach(function(p) {
+    filterParamMap[p] = {};
+  });
+
+
+  //document.getElementById('filterDisplayMode').value = FDM_MODIFY_TD;
+  //updateFilterDisplayMode();
+
+  document.getElementById('filterMode').value = FILTER_OFF;
+  updateFilterMode();
+
+  showForm[MAIN] = true;
+  showForm[ADVANCED] = false;
+  showForm[SLIDER] = false;
+  updateForm(MAIN);
+  updateForm(ADVANCED);
+  updateForm(SLIDER);
+
+
+  updatePhaseColoring_NoRedraw();
+  document.getElementById('filterOverlayToggle').checked = true;
+  updateFilterOverlayToggle_NoRedraw();
+
+  handleResize();
+}
+
+// full credit for this function goes go:
+// https://stackoverflow.com/questions/43853119/
+// I have no fucking clue how this code works
+function getCoords(e, plot) {
+  var c = document.getElementById(plot);
+  var bbox = c.getBoundingClientRect();
+  //var mx = e.clientX - bbox.left * (c.width / bbox.width);
+  //var my = e.clientY - bbox.top * (c.height / bbox.height);
+  var mx = e.clientX - bbox.left;
+  var my = e.clientY - bbox.top;
+
+  mx /= bbox.width;
+  my /= bbox.height;
+
+  mx *= c.width;
+  my *= c.height;
+
+  return [mx, my];
+}
+
+function handlePointerMove(e, plot) {
+  if (fn == undefined)
+    return;
+  if (tdMode == REAL_ONLY_MODE && TDPs == undefined)
+    return;
+  if (tdMode != REAL_ONLY_MODE && CPLX_TDPs == undefined)
+    return;
+
+  var pt = getCoords(e, plot);
+  var x = pt[0];
+  var y = pt[1];
+
+  var isPlot1 = plot == 'plot1';
+  // there are in fact 3 modes: real only (tdCplxEnabled == false), magnitude, and parts
+  var mode = isPlot1 ? tdMode : fdMode;
+
+  var partsTop;
+  var boundsOn;
+  var absXMin;
+  var absXMax;
+  var absYMin;
+  var absYMax;
+  var pts, pts2, phpts;
+  var Ms, Rs, Is, Ps, rs;
+  var sc_rs, sc_Ms, sc_Rs, sc_Is;
+
+  if (isPlot1) {
+    partsTop = tdPartsTop;
+    boundsOn = plot1BoundsOn;
+    absXMin = tdAbsXMin;
+    absXMax = tdAbsXMax;
+    absYMin = tdAbsYMin;
+    absYMax = tdAbsYMax;
+
+    if (filterMode == FILTER_OFF) { // TODO: add condition of filterDisplayMode
+      rs = TDPs;
+      sc_rs = scTDPs;
+
+      Ms = CPLX_TDPs_Ms;
+      Rs = CPLX_TDPs_Rs;
+      Is = CPLX_TDPs_Is;
+      Ps = CPLX_TDPs_Ps;
+      sc_Ms = CPLX_scTDPs_Ms;
+      sc_Rs = CPLX_scTDPs_Rs;
+      sc_Is = CPLX_scTDPs_Is;
+    } else {
+      rs = ftr_TDPs; // still used in real only mode?
+      sc_rs = ftr_scTDPs; // ditto
+
+      Ms = ftr_CPLX_TDPs_Ms;
+      Rs = ftr_CPLX_TDPs_Rs;
+      Is = ftr_CPLX_TDPs_Is;
+      Ps = ftr_CPLX_TDPs_Ps;
+      sc_Ms = ftr_CPLX_scTDPs_Ms;
+      sc_Rs = ftr_CPLX_scTDPs_Rs;
+      sc_Is = ftr_CPLX_scTDPs_Is;
+    }
+  } else {
+    partsTop = fdPartsTop;
+    boundsOn = plot2BoundsOn;
+    absXMin = fdAbsXMin;
+    absXMax = fdAbsXMax;
+    absYMin = fdAbsYMin;
+    absYMax = fdAbsYMax;
+
+    rs = undefined;
+    sc_rs = undefined;
+
+    if (filterMode == FILTER_OFF) { // TODO: add condition of filterDisplayMode
+      Ms = FDPs_Ms;
+      Rs = FDPs_Rs;
+      Is = FDPs_Is;
+      Ps = FDPs_Ps;
+      sc_Ms = scFDPs_Ms;
+      sc_Rs = scFDPs_Rs;
+      sc_Is = scFDPs_Is;
+    } else {
+      Ms = ftr_FDPs_Ms;
+      Rs = ftr_FDPs_Rs;
+      Is = ftr_FDPs_Is;
+      Ps = ftr_FDPs_Ps;
+      sc_Ms = ftr_scFDPs_Ms;
+      sc_Rs = ftr_scFDPs_Rs;
+      sc_Is = ftr_scFDPs_Is;
+    }
+  }
+
+  /*var partsTop = isPlot1 ? tdPartsTop : fdPartsTop;
+  var boundsOn = isPlot1 ? plot1BoundsOn : plot2BoundsOn;
+  var absXMin = isPlot1 ? tdAbsXMin : fdAbsXMin;
+  var absXMax = isPlot1 ? tdAbsXMax : fdAbsXMax;
+  var absYMin = isPlot1 ? tdAbsYMin : fdAbsYMin;
+  var absYMax = isPlot1 ? tdAbsYMax : fdAbsYMax;*/
+
+  /*var Ms = isPlot1 ? CPLX_TDPs_Ms : FDPs_Ms;
+  var Rs = isPlot1 ? CPLX_TDPs_Rs : FDPs_Rs;
+  var Is = isPlot1 ? CPLX_TDPs_Is : FDPs_Is;
+  var Ps = isPlot1 ? CPLX_TDPs_Ps : FDPs_Ps;
+  var rs = isPlot1 ? TDPs : undefined; // idk what else to call them*/
+
+  /*var sc_rs = isPlot1 ? scTDPs : undefined;
+  var sc_Ms = isPlot1 ? CPLX_scTDPs_Ms : scFDPs_Ms;
+  var sc_Rs = isPlot1 ? CPLX_scTDPs_Rs : scFDPs_Rs;
+  var sc_Is = isPlot1 ? CPLX_scTDPs_Is : scFDPs_Is;*/
+
+  var phaseMode = phaseColoring && (mode == MAGNI_MODE); // I think?
+
+  if (mode == MAGNI_MODE) {
+    pts = Ms;
+    if (phaseMode)
+      phpts = Ps;
+  } else if (mode == PARTS_MODE) {
+    pts = Rs;
+    pts2 = Is;
+  } else if (mode == REAL_ONLY_MODE) {
+    pts = rs;
+  }
+
+  var pad = calcPad(boundsOn);
+  var bk;
+  if (x <= pad) {
+    bk = 0;
+  } else if (x >= plot_width*vw - pad) {
+    bk = pts.length - 1;
+  } else {
+    var xa = x - pad; // adjust for padding
+    var xpcnt = xa / (plot_width*vw - 2*pad);
+
+    // round x to right "bucket" wrt sample count
+    var q = xpcnt / (1/(sc-1));
+    var rem = q%1;
+    bk = (rem <= 0.5) ? (q-rem) : (q-rem+1);
+  }
+
+  var [xf, yf] = pts[bk];
+  var yf2;
+  if (mode == PARTS_MODE)
+    yf2 = pts2[bk][1];
+
+  var xf_cnv, yf_cnv;
+  var yf2_cnv;
+  var dummy;
+  if (mode == MAGNI_MODE) {
+    var scPts = sc_Ms;
+    [xf_cnv, yf_cnv] = scPts[bk];
+  } else if (mode == PARTS_MODE) {
+    var scPts_R = sc_Rs;
+    var scPts_I = sc_Is;
+    [xf_cnv, yf_cnv] = scPts_R[bk];
+    [dummy, yf2_cnv] = scPts_I[bk];
+  } else if (mode == REAL_ONLY_MODE) {
+    var scPts = sc_rs;
+    [xf_cnv, yf_cnv] = scPts[bk];
+  }
+
+  //var [xf_cnv, yf_cnv] = scPts[bk];
+
+  var xf_fx = (xf >= 0 ? '+' : '') + xf.toFixed(5);
+  var yf_fx = (yf >= 0 ? '+' : '') + yf.toFixed(5);
+  var pointText = '(' + xf_fx + ', ' + yf_fx + ')';
+
+  var pointText2 = undefined;
+  if (mode == PARTS_MODE) {
+    var yf2_fx = (yf2 >= 0 ? '+' : '') + yf2.toFixed(5);
+    pointText2 = '(' + xf_fx + ', ' + yf2_fx + ')';
+  }
+
+  redrawPlots();
+  drawLine(plot, xf_cnv, 0, xf_cnv, plot_height * vw, 'rgb(0,255,0)', 1);
+
+  var color1 = RE_COLOR;
+  var color2 = IM_COLOR;
+
+  if (mode == MAGNI_MODE || mode == REAL_ONLY_MODE) {
+    drawLine(plot, 0, yf_cnv, plot_width * vw, yf_cnv, 'rgb(0,255,0)', 1);
+    drawCircle(plot, xf_cnv, yf_cnv, plot_width*vw*0.005, 'rgb(0,255,0)', 2);
+  } else if (mode == PARTS_MODE) {
+    drawLine(plot, 0, yf_cnv, plot_width * vw, yf_cnv, color1, 2);
+    drawLine(plot, 0, yf2_cnv, plot_width * vw, yf2_cnv, color2, 2);
+    drawCircle(plot, xf_cnv, yf_cnv, plot_width*vw*0.005, color1, 2);
+    drawCircle(plot, xf_cnv, yf2_cnv, plot_width*vw*0.005, color2, 2);
+  }
+
+  var font = 0.02*plot_width*vw + "px Monospace";
+  var align;
+  var startCorner;
+  var xOffset;
+  var yOffset;
+  var longerLength = (pointText2 != undefined)
+    ? getMax([pointText.length, pointText2.length]) : pointText.length;
+  var ttWidth = plot_width*vw*longerLength*0.01325;
+  var ttHeight = ((mode == PARTS_MODE || phaseMode) ? 0.0625 : 0.0375) * plot_width*vw;
+  var color = 'rgb(0,255,0)';
+  var shiftFactor;
+  var unit = plot_width*vw*0.0125;
+  var SF = ttHeight + 2*unit;
+
+  if (mode == PARTS_MODE && partsTop == IMAG) {
+    yf = yf2;
+    yf_cnv = yf2_cnv;
+  }
+
+  var halfPlotWidth = plot_width*vw*0.5;
+  var halfPlotHeight = plot_height*vw*0.5;
+
+  if (xf_cnv <= halfPlotWidth) {
+    align = 'left';
+    xOffset = unit;
+    if (yf_cnv >= halfPlotHeight) {
+      startCorner = BOTTOM_LEFT;
+      yOffset = -unit;
+      shiftFactor = SF;
+    } else {
+      startCorner = TOP_LEFT;
+      yOffset = unit;
+      shiftFactor = 0;
+    }
+  } else {
+    align = 'right';
+    xOffset = -unit;
+    if (yf_cnv >= halfPlotHeight) {
+      startCorner = BOTTOM_RIGHT;
+      yOffset = -unit;
+      shiftFactor = SF;
+    } else {
+      startCorner = TOP_RIGHT;
+      yOffset = unit;
+      shiftFactor = 0;
+    }
+  }
+
+  // stopgap solution to rectify the box if it goes offscreen
+  // works unreasonably well
+  if (yf_cnv < 0) {
+    yf_cnv = 0;
+  } else if (yf_cnv > plot_height*vw) {
+    yf_cnv = plot_height*vw;
+  }
+
+  var xText = xf_cnv + 2*xOffset;
+  var yTextBase = yf_cnv + 3*Math.abs(yOffset) - shiftFactor;
+  var textHeight = plot_width*vw*0.025;
+
+  var ph;
+  var phColor;
+  if (phaseMode) {
+    ph = phpts[bk][1];
+    phColor = phaseToColor(ph);
+  }
+
+  var rectColor;
+  if (mode == MAGNI_MODE || mode == REAL_ONLY_MODE) {
+    if (phaseMode)
+      rectColor = phColor;
+    else
+      rectColor = 'rgb(0,255,0)';
+  } else if (mode == PARTS_MODE) {
+    rectColor = (partsTop == REAL) ? color1 : color2;
+  }
+
+  drawRectFromCorner(plot, startCorner, xf_cnv + xOffset, yf_cnv + yOffset,
+    ttWidth, ttHeight, rectColor, 2, true, BG_COLOR);
+
+  if (mode == MAGNI_MODE || mode == REAL_ONLY_MODE) {
+    drawText(plot, xText, yTextBase, font, color, align, pointText);
+    if (phaseMode) {
+      var phText = 'phase: ' + ph.toFixed(5);
+      drawText(plot, xText, yTextBase + textHeight, font, phColor, align, phText);
+    }
+  } else if (mode == PARTS_MODE) {
+    drawText(plot, xText, yTextBase, font, color1, align, pointText);
+    drawText(plot, xText, yTextBase + textHeight, font, color2, align, pointText2);
+  }
+
+  // for debug
+  //drawCircle(plot, x, y, plot_width*vw*0.005, 'rgb(255,0,255)', 2);
+}
+
+function handleFdPartsTopClick() {
+  var button = document.getElementById('fdPartsTop');
+  if (fdPartsTop == REAL) {
+    fdPartsTop = IMAG;
+    button.textContent = 'Imaginary part in front / cursor focus (click to toggle)';
+  } else {
+    fdPartsTop = REAL;
+    button.textContent = 'Real part in front / cursor focus (click to toggle)';
+  }
+  redrawPlots();
+}
+
+function handleTdPartsTopClick() {
+  var button = document.getElementById('tdPartsTop');
+  if (tdPartsTop == REAL) {
+    tdPartsTop = IMAG;
+    button.textContent = 'Imaginary part in front / cursor focus (click to toggle)';
+  } else {
+    tdPartsTop = REAL;
+    button.textContent = 'Real part in front / cursor focus (click to toggle)';
+  }
+  redrawPlots();
+}
+
+const defaultParamNames = ['a','b','c','d'];
+var availableParamNames = ['a','b','c','d'];
+var paramOverflowCounter = 1;
+var sliderParamMap = {};
+
+function addSlider() {
+  var newSliderDiv = document.createElement('div');
+  var paramName;
+  if (availableParamNames.length > 0) {
+    paramName = availableParamNames[0];
+    availableParamNames = availableParamNames.slice(1);
+  } else {
+    paramName = 'k' + paramOverflowCounter;
+    paramOverflowCounter++;
+  }
+
+  newSliderDiv.id = 'sliderDiv_' + paramName;
+
+  var label_1 = document.createElement('label');
+  label_1.innerHTML = 'Parameter name: ';
+  newSliderDiv.appendChild(label_1);
+
+  var paramNameInput = document.createElement('input');
+  paramNameInput.classList.add('extraShort');
+  paramNameInput.classList.add('sliderParamInput');
+  paramNameInput.classList.add('PARAM_' + paramName);
+  paramNameInput.value = paramName;
+  paramNameInput.onkeyup = function () { updateSliderParamName(newSliderDiv); };
+  newSliderDiv.appendChild(paramNameInput);
+
+  var sep_1 = document.createElement('span');
+  sep_1.innerHTML = ' | ';
+  newSliderDiv.appendChild(sep_1);
+
+  var label_2 = document.createElement('label');
+  label_2.innerHTML = 'Value: ';
+  newSliderDiv.appendChild(label_2);
+
+  var slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = 0;
+  slider.max = SLIDER_STEP_COUNT_DEFAULT;
+  slider.step = 1;
+  slider.classList.add('slider');
+  slider.oninput = function() { updateSlider(newSliderDiv); };
+  slider.value = "" + Math.floor(SLIDER_STEP_COUNT_DEFAULT / 2);
+  newSliderDiv.appendChild(slider);
+
+  var sep_1_1 = document.createElement('span');
+  sep_1_1.innerHTML = ' ';
+  newSliderDiv.appendChild(sep_1_1);
+
+  var sliderLabel = document.createElement('label');
+  sliderLabel.classList.add('sliderLabel');
+  newSliderDiv.appendChild(sliderLabel);
+
+  var sep_2 = document.createElement('span');
+  sep_2.innerHTML = ' | ';
+  newSliderDiv.appendChild(sep_2);
+
+  var label_3 = document.createElement('label');
+  label_3.innerHTML = 'Range: ';
+  newSliderDiv.appendChild(label_3);
+
+  var lbInput = document.createElement('input');
+  lbInput.classList.add('short');
+  lbInput.classList.add('sliderRangeLBInput');
+  lbInput.onkeyup = function() { updateSliderRangeLB(newSliderDiv); }
+  lbInput.value = SLIDER_RANGE_LB_DEFAULT;
+  newSliderDiv.appendChild(lbInput);
+
+  var toSpan = document.createElement('span');
+  toSpan.innerHTML = ' to ';
+  newSliderDiv.append(toSpan);
+
+  var ubInput = document.createElement('input');
+  ubInput.classList.add('short');
+  ubInput.classList.add('sliderRangeUBInput');
+  ubInput.onkeyup = function() { updateSliderRangeUB(newSliderDiv); }
+  ubInput.value = SLIDER_RANGE_UB_DEFAULT;
+  newSliderDiv.appendChild(ubInput);
+
+  var sep_2_1 = document.createElement('span');
+  sep_2_1.innerHTML = ' ';
+  newSliderDiv.append(sep_2_1);
+
+  var rangeDisp = document.createElement('label');
+  rangeDisp.classList.add('sliderRangeDisp');
+  rangeDisp.textContent = '[]'
+  newSliderDiv.append(rangeDisp);
+
+  var sep_3 = document.createElement('span');
+  sep_3.innerHTML = ' | ';
+  newSliderDiv.appendChild(sep_3);
+
+  var label_4 = document.createElement('label');
+  label_4.innerHTML = 'Steps: ';
+  newSliderDiv.appendChild(label_4);
+
+  var stepCountInput = document.createElement('input');
+  stepCountInput.classList.add('short');
+  stepCountInput.classList.add('sliderStepCountInput');
+  stepCountInput.onkeyup = function() { updateSliderStepCount(newSliderDiv); }
+  stepCountInput.value = SLIDER_STEP_COUNT_DEFAULT;
+  newSliderDiv.appendChild(stepCountInput);
+
+  var sep_4 = document.createElement('span');
+  sep_4.innerHTML = ' | ';
+  newSliderDiv.appendChild(sep_4);
+
+  var rb = document.createElement('button');
+  rb.type = 'button';
+  rb.classList.add('PARAM_' + paramName);
+  rb.classList.add('sliderRemovalButton');
+  rb.onclick = function() { removeSlider(newSliderDiv); };
+  rb.innerHTML = 'Remove this slider ("' + paramName + '")';
+  newSliderDiv.appendChild(rb);
+
+  var sliderParamError = document.createElement('label');
+  sliderParamError.innerHTML = '';
+  sliderParamError.classList.add('sliderParamError');
+  newSliderDiv.appendChild(sliderParamError);
+
+  var sliderRangeError = document.createElement('label');
+  sliderRangeError.innerHTML = '';
+  sliderRangeError.classList.add('sliderRangeError');
+  newSliderDiv.appendChild(sliderRangeError);
+
+  var stepCountError = document.createElement('label');
+  stepCountError.classList.add('sliderStepCountError');
+  stepCountError.textContent = '';
+  newSliderDiv.appendChild(stepCountError);
+
+  document.getElementById('sliderList').appendChild(newSliderDiv);
+
+  // capital letters because of camel case in ID's
+  sliderParamMap[paramName] = {
+    'Value': 0,
+    'RangeLB': SLIDER_RANGE_LB_DEFAULT,
+    'RangeUB': SLIDER_RANGE_UB_DEFAULT,
+    'StepCount': SLIDER_STEP_COUNT_DEFAULT
+  };
+
+  updateSliderRangeLB(newSliderDiv);
+  updateSliderRangeUB(newSliderDiv);
+
+  // also update fn, in case user added parameter after typing in function
+  updateInputFunctionAndPlots();
+}
+
+function updateSliderValue(sliderDiv) {
+  var paramName = sliderDiv.id.slice('sliderDiv_'.length);
+  var sliderValue = sliderDiv.getElementsByClassName('slider')[0].value;
+  sliderParamMap[paramName]['Value'] = sliderValue;
+}
+
+function updateSliderParamValue(sliderDiv) {
+  var paramName = sliderDiv.id.slice('sliderDiv_'.length);
+
+  var ub = sliderParamMap[paramName]['RangeUB'];
+  var lb = sliderParamMap[paramName]['RangeLB'];
+  var val = sliderParamMap[paramName]['Value'];
+  var stepCount = sliderParamMap[paramName]['StepCount'];
+
+  var range = ub - lb;
+  var pcnt = val / stepCount;
+  var paramVal = lb + pcnt * range;
+
+  sliderParamMap[paramName]['ParamValue'] = paramVal;
+}
+
+function updateSliderLabel(sliderDiv) {
+  var paramName = sliderDiv.id.slice('sliderDiv_'.length);
+  var paramValue = sliderParamMap[paramName]['ParamValue'];
+  var sliderValue = sliderParamMap[paramName]['Value'];
+  var sliderStepCount = sliderParamMap[paramName]['StepCount'];
+
+  var text = '[' + paramName + ' = ' + paramValue.toFixed(5) + '] ' +
+    '(step: ' + sliderValue + '/' + sliderStepCount + ')';
+
+  sliderDiv.getElementsByClassName('sliderLabel')[0].textContent = text;
+}
+
+function updateSlider(sliderDiv) {
+  updateSliderValue(sliderDiv);
+  updateSliderParamValue(sliderDiv);
+  updateSliderLabel(sliderDiv);
+  //updateAndRedrawPlots();
+  updateInputFunctionAndPlots();
+}
+
+function updateSliderRangeLB(sliderDiv) {
+  return updateSliderRangeBound(sliderDiv, 'RangeLB');
+}
+
+function updateSliderRangeUB(sliderDiv) {
+  return updateSliderRangeBound(sliderDiv, 'RangeUB');
+}
+
+function updateSliderRangeBound(sliderDiv, setting) {
+  var str = sliderDiv.getElementsByClassName('slider' + setting + 'Input')[0].value;
+  var r = evalWithShortcut(str);
+
+  var sliderRangeError = sliderDiv.getElementsByClassName('sliderRangeError')[0];
+  if (isEvalError(r)) {
+    sliderRangeError.innerHTML = '<br />&#8195;range error: ' + r;
+    return;
+  }
+  sliderRangeError.innerHTML = '';
+
+  var paramName = sliderDiv.id.slice('sliderDiv_'.length);
+  sliderParamMap[paramName][setting] = r;
+
+  var lbx = sliderParamMap[paramName]['RangeLB'].toFixed(5);
+  var ubx = sliderParamMap[paramName]['RangeUB'].toFixed(5);
+
+  var sliderRangeDisp = sliderDiv.getElementsByClassName('sliderRangeDisp')[0];
+  sliderRangeDisp.textContent = '(' + lbx + ' to ' + ubx + ')';
+
+  updateSlider(sliderDiv);
+}
+
+function updateSliderStepCount(sliderDiv) {
+  var stepCountError = sliderDiv.getElementsByClassName('sliderStepCountError')[0];
+
+  var r = Number(sliderDiv.getElementsByClassName('sliderStepCountInput')[0].value);
+  if (isNaN(r) || !Number.isInteger(r) || r <= 0) {
+    var errMsg = '<br />&#8195;step count error: needs to be positive integer';
+    stepCountError.innerHTML = errMsg;
+    return;
+  }
+
+  var paramName = sliderDiv.id.slice('sliderDiv_'.length);
+  sliderParamMap[paramName]['StepCount'] = r;
+
+  stepCountError.textContent = '';
+
+  var slider = sliderDiv.getElementsByClassName('slider')[0];
+  slider.max = r;
+  slider.value = 0;
+
+  updateSlider(sliderDiv);
+}
+
+// https://stackoverflow.com/questions/2450641/validating-alphabetic-only-string-in-javascript
+function isValidParamName(s) {
+  //return /^[a-zA-Z_]+[a-zA-Z0-9_]*$/.test(s);
+  return /^[a-zA-Z0-9_]+$/.test(s);
+}
+
+function updateSliderParamName(sliderDiv) {
+  var oldParamName = sliderDiv.id.slice('sliderDiv_'.length);
+
+  var paramNameInput = sliderDiv.getElementsByClassName('sliderParamInput')[0];
+  var newParamName = paramNameInput.value;
+
+  var sliderParamError = sliderDiv.getElementsByClassName('sliderParamError')[0];
+
+  if (newParamName.length == 0) {
+    sliderParamError.innerHTML = '';
+    return;
+  }
+
+  // ???
+  // if you don't include this, it breaks when you "tab into" the param name text box
+  // why, I have no idea
+  if (newParamName == oldParamName)
+    return;
+
+  // don't ask about the second part...e.g. if you change 'ab' to 'a' but 'a' is in use,
+  // and you then change it back to 'ab'
+  if ((sliderParamMap[newParamName] != undefined) && (oldParamName != newParamName)) {
+    sliderParamError.innerHTML = '<br />&#8195;parameter error: name already in use';
+    return;
+  }
+
+  if (!isValidParamName(newParamName)) {
+    sliderParamError.innerHTML = '<br />&#8195;parameter error: can only contain alphanumeric characters and underscores';
+    return;
+  }
+
+  sliderParamError.innerHTML = '';
+
+  sliderDiv.id = 'sliderDiv_' + newParamName;
+
+  // remember to update the onkeyup as well...
+  paramNameInput.onkeyup = function() { updateSliderParamName(sliderDiv); };
+
+  // change the removal button because fancy
+  var rb = sliderDiv.getElementsByClassName('sliderRemovalButton')[0];
+  rb.innerHTML = 'Remove this slider ("' + newParamName + '")';
+
+  // avoid htmlcollection headache
+  var elems = Array.from(document.getElementsByClassName('PARAM_' + oldParamName));
+
+  elems.forEach(function(elem) {
+    elem.classList.remove('PARAM_' + oldParamName);
+    elem.classList.add('PARAM_' + newParamName);
+  });
+
+  // if the new param name happens to the in the availableParamNames list, remove it
+  if (availableParamNames.includes(newParamName)) {
+    availableParamNames = availableParamNames.filter(n => n != newParamName);
+  }
+
+  // finally add the old name back to the availableParamNames, if it was original
+  // once again a magic 2nd clause...
+  // see why it's necessary: 'a' -> 'a ' (err) -> 'a' -> delete -> add new slider twice
+  if (defaultParamNames.includes(oldParamName) && (oldParamName != newParamName)) {
+    availableParamNames.push(oldParamName);
+    availableParamNames.sort();
+  }
+
+  // change the entry in sliderParamMap
+  var entry = sliderParamMap[oldParamName];
+  sliderParamMap[newParamName] = entry;
+  sliderParamMap[oldParamName] = undefined;
+
+  updateSlider(sliderDiv);
+}
+
+function removeSlider(sliderDiv) {
+  var paramName = sliderDiv.id.slice('sliderDiv_'.length);
+
+  if (defaultParamNames.includes(paramName)) {
+    availableParamNames.push(paramName);
+    availableParamNames.sort();
+  }
+
+  sliderDiv.remove();
+
+  sliderParamMap[paramName] = undefined;
+
+  updateInputFunctionAndPlots();
+}
+
+function initSlider() {
+  addSlider();
+}
+
+function updatePhaseColoring_NoRedraw() {
+  phaseColoring = document.getElementById('phaseColoring').checked;
+}
+
+function updatePhaseColoring() {
+  updatePhaseColoring_NoRedraw();
+  updateAndRedrawPlots();
+}
+
+function updateFilterOverlayToggle_NoRedraw() {
+  showFilterOverlay = document.getElementById('filterOverlayToggle').checked;
+}
+
+function updateFilterOverlayToggle() {
+  updateFilterOverlayToggle_NoRedraw();
+  updateAndRedrawPlots();
+}
+
+// listeners
+window.addEventListener('resize', handleResize, true);
+document.getElementById('functionInput').onkeyup = updateInputFunctionAndPlots_Keypress;
+document.getElementById('sampleBoundLower').onkeyup = updateLowerBoundAndPlots;
+document.getElementById('sampleBoundUpper').onkeyup = updateUpperBoundAndPlots;
+document.getElementById('sampleCount').oninput = updateSampleCountAndPlots;
+
+document.getElementById('plot1CurveMode').addEventListener('change', function() {
+  this.checked = plot1CurveMode = !plot1CurveMode;
+  redrawPlots();
+});
+document.getElementById('plot1StemMode').addEventListener('change', function() {
+  this.checked = plot1StemMode = !plot1StemMode;
+  redrawPlots();
+});
+document.getElementById('plot1PointMode').addEventListener('change', function() {
+  this.checked = plot1PointMode = !plot1PointMode;
+  redrawPlots();
+});
+document.getElementById('plot1XAxisOn').addEventListener('change', function() {
+  this.checked = plot1XAxisOn = !plot1XAxisOn;
+  redrawPlots();
+});
+document.getElementById('plot1YAxisOn').addEventListener('change', function() {
+  this.checked = plot1YAxisOn = !plot1YAxisOn;
+  redrawPlots();
+});
+document.getElementById('plot1BoundsOn').addEventListener('change', function() {
+  this.checked = plot1BoundsOn = !plot1BoundsOn;
+  updateAndRedrawPlots();
+});
+document.getElementById('plot1ScaleToFit').addEventListener('change', function() {
+  this.checked = plot1ScaleToFit = !plot1ScaleToFit;
+  redrawPlots();
+});
+
+document.getElementById('plot2CurveMode').addEventListener('change', function() {
+  this.checked = plot2CurveMode = !plot2CurveMode;
+  redrawPlots();
+});
+document.getElementById('plot2StemMode').addEventListener('change', function() {
+  this.checked = plot2StemMode = !plot2StemMode;
+  redrawPlots();
+});
+document.getElementById('plot2PointMode').addEventListener('change', function() {
+  this.checked = plot2PointMode = !plot2PointMode;
+  redrawPlots();
+});
+document.getElementById('plot2XAxisOn').addEventListener('change', function() {
+  this.checked = plot2XAxisOn = !plot2XAxisOn;
+  redrawPlots();
+});
+document.getElementById('plot2YAxisOn').addEventListener('change', function() {
+  this.checked = plot2YAxisOn = !plot2YAxisOn;
+  redrawPlots();
+});
+document.getElementById('plot2BoundsOn').addEventListener('change', function() {
+  this.checked = plot2BoundsOn = !plot2BoundsOn;
+  updateAndRedrawPlots();
+});
+document.getElementById('plot2ScaleToFit').addEventListener('change', function() {
+  this.checked = plot2ScaleToFit = !plot2ScaleToFit;
+  redrawPlots();
+});
+
+// I wouldn't use oninput event for winSize
+document.getElementById('winSize').onchange = handleWinSizeUpdate;
+document.getElementById('revFreqMode').onchange = updateRevFreqModeAndPlots;
+document.getElementById('tdMode').onchange = updateTdMode;
+document.getElementById('fdMode').onchange = updateFdMode;
+
+document.getElementById('plot1').addEventListener('pointermove', function(e) {
+  handlePointerMove(e, 'plot1');
+});
+document.getElementById('plot2').addEventListener('pointermove', function(e) {
+  handlePointerMove(e, 'plot2');
+});
+
+document.getElementById('plot1').addEventListener('mouseout', function() {
+  redrawPlots();
+});
+
+document.getElementById('plot2').addEventListener('mouseout', function() {
+  redrawPlots();
+});
+
+document.getElementById('fdPartsTop').onclick = handleFdPartsTopClick;
+document.getElementById('tdPartsTop').onclick = handleTdPartsTopClick;
+
+document.getElementById('toggleMain').onclick = () => handleFormToggle(MAIN);
+document.getElementById('toggleAdvanced').onclick = () => handleFormToggle(ADVANCED);
+document.getElementById('toggleSlider').onclick = () => handleFormToggle(SLIDER);
+document.getElementById('toggleFilter').onclick = () => handleFormToggle(FILTER);
+
+document.getElementById('addSlider').onclick = addSlider;
+
+document.getElementById('phaseColoring').onchange = updatePhaseColoring;
+
+//document.getElementById('filterDisplayMode').onchange = updateFilterDisplayMode;
+document.getElementById('filterMode').onchange = updateFilterMode;
+
+document.getElementById('filterOverlayToggle').onclick = updateFilterOverlayToggle;
+
+// "main"
+document.getElementById('functionInput').value = '';
+// if we leave this line out, weird overflow occurs
+
+init();
+//testPlots();
+  </script>
+
+ </body>
+</html>
