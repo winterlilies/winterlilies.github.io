@@ -72,7 +72,7 @@
         <h3>Technical challenges</h3>
         <hr />
         <h4>Implementing complex arithmetic</h4>
-        <p>The FFT makes use of certain properties of the complex exponential function in order to break down the task recursively and enable an \( O \left( n \log n \right) \) runtime, so the ability to perform operations on complex numbers will be needed by the implementation. Javascript lacks built-in support for complex numbers, so I found a workaround by using an ordered pair (actually an array of length 2) to represent the real and imaginary parts of a complex number.</p>
+        <p>The FFT makes use of certain properties of the complex exponential function in order to break down the task recursively and enable an \( O \left( n \log n \right) \) runtime, so the ability to perform operations on complex numbers will be needed by the implementation. Javascript lacks built-in support for complex numbers, but we can work around this by using an ordered pair (actually an array of length 2) to represent the real and imaginary parts of a complex number.</p>
         <div class="math inBox">
          \[ z = x + iy \Longleftrightarrow [x,y] \]
         </div>
