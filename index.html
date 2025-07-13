@@ -251,7 +251,9 @@ function fft_generic(xs, inverse) {
         <h3>Technical challenges</h3>
         <hr />
         <h4>Hash tabling</h4>
-        <p>The C standard library is limited and lacks support for common data structures like linked lists and binary trees. This necessitates either using a third party library or rolling your own library, and I usually go with the latter, partly as an educational exercise and partly so that I can understand how the library works intuitively and I don't have to decode obscure documentation. In this project, since components can be selected graphically on screen, a hash table was used to quickly map from screen coordinates to the corresponding object in memory. The hash function itself was sourced from the internet more or less verbatim, since deriving a good hash function is mathematically involved and well beyond my scope.</p>
+        <p>The C standard library is limited and lacks support for common data structures like linked lists and binary trees. This necessitates either using a third party library or rolling your own library, and I usually go with the latter, partly as an educational exercise and partly so that I can understand how the library works intuitively and I don't have to decode obscure documentation. In this project, since components can be selected graphically on screen, a hash table was used to quickly map from screen coordinates to the corresponding object in memory. The hash function itself was sourced from the internet more or less verbatim, since deriving a good hash function is mathematically involved and well beyond the scope.</p>
+        <br />
+        <p>In memory, hash tables exist as just contiguous blocks of data. For this implementation, they were created as a dynamically allocated struct that was mostly occupied by a buffer of 8-byte words, along with some metadata about the load factor.</p>
         <pre class="code inBox">
 typedef struct {
   uint64_t *bfr;
@@ -262,7 +264,7 @@ typedef struct {
 typedef struct {
   uint64_t key, val;
 } hmap_entry_tx;</pre>
-        <p>The bulk of the work involved creating a set of routines for accessing the data structure and automating its memory allocation. My personal convention for implementing data structures in C is to create standard constructor and destructor patterns for managing the lifetime of the object, so the responsibility falls on the calling routine to know when the object is no longer needed, although in other respects the process is automated, and destructors can recursively call other destructors to simplify the cleanup process. The library also takes care of resizing the hash table once a certain load factor has been reached and rehashing automatically.</p>
+        <p>The bulk of the work was creating a set of routines for accessing the data structure and automating its memory allocation. My personal convention for implementing data structures in C is to create standard constructor and destructor patterns for managing the lifetime of the object, so the responsibility falls on the calling routine to know when the object is no longer needed, although in other respects the process is automated, and destructors can recursively call other destructors to simplify the cleanup process. The library also takes care of resizing the hash table once a certain load factor has been reached and rehashing automatically.</p>
         <pre class="code inBox">
 static void hmap_init(hmap_tx *h, int bkts) {
   int bytes = BYTES_PER_BKT * bkts;
