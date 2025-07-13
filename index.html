@@ -3,6 +3,7 @@
  <head>
   <meta charset="utf-8"/>
   <title>projects</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <link rel="stylesheet" type="text/css" href="styles.css" id="lnk" />
  </head>
  <body>
@@ -18,6 +19,10 @@
       </div>
       <div class="boxbottom">
        <ul class="lstn" id="projects">
+        <li id="li_ftvt" class="navli" baseColor="#ff4080" internal="true">ftvt</li>
+        <li id="li_rjx" class="navli" baseColor="#ff8f40" internal="true">rjx</li>
+        <li id="li_xx" class="navli" baseColor="#dfff40" internal="true">xx</li>
+        <li id="li_p4" class="navli" baseColor="#50ff40" internal="true">Project 4</li>
        </ul>
       </div>
      </div>
@@ -28,6 +33,14 @@
       </div>
       <div class="boxbottom">
        <ul class="lstn" id="boring">
+        <li id="li_aboutme" class="navli" baseColor="#40ffbf" internal="true">About me</li>
+        <li id="li_resume" class="navli" baseColor="#40afff" internal="true">Resume</li>
+        <li id="li_github" class="navli" baseColor="#6040ff" internal="false">
+         <a class="link" href="https://github.com/winterlilies">Github</a>
+        </li>
+        <li id="li_linkedin" class="navli" baseColor="#ef40ff" internal="false">
+         <a class="link" href="https://github.com/winterlilies">LinkedIn 🤮</a>
+        </li>
        </ul>
       </div>
      </div>
@@ -48,7 +61,252 @@
       <div class="boxtop" style="background-color: rgb(128, 192, 128, 0.75)">
        Tracy's awesome project portfolio!!!1
       </div>
+
       <div class="boxbottom" id="contentArea">
+
+       <div id="ftvt" style="display:none;">
+        <h3>ftvt (fourier transform visualization tool)</h3>
+        <hr />
+        <p>ftvt is a tool for visualizing Fourier transforms in one dimension. Signals are entered as mathematical expressions in symbolic notation, which are then parsed into evaluable functions, sampled over an interval, sent through the FFT algorithm, and finally plotted side by side with the original signal. By default, the plots in both the time domain and the frequency domain are updated automatically whenever the entered expression is edited. The most notable feature is a Desmos-style "slider" feature that allows you to smoothly adjust a parameter of the signal while viewing the effects to the transformed function in real time. There is also a filtering function with low pass, high pass, band pass, and band stop filters which works in much the same way.</p>
+        <a href="imgs/ftvt/Screenshot 2025-07-13 at 02-16-20 ftvt.png" class="ssa"></a>
+        <h3>Technical challenges</h3>
+        <hr />
+        <h4>Implementing complex arithmetic</h4>
+        <p>The FFT makes use of certain properties of the complex exponential function in order to break down the task recursively and enable an \( O \left( n \log n \right) \) runtime, so the ability to perform operations on complex numbers will be needed by the implementation. Javascript lacks built-in support for complex numbers, so I found a workaround by using an ordered pair (actually an array of length 2) to represent the real and imaginary parts of a complex number.</p>
+        <div class="math inBox">
+         \[ z = x + iy \Longleftrightarrow [x,y] \]
+        </div>
+        <pre class="code inBox">
+function cplx(re, im) {
+  return [re, im];
+}
+
+function cplxFromReal(re) {
+  return [re, 0];
+}</pre>
+        <p>All the mathematical operations needed by the algorithm were then implemented manually. Addition and subtraction are simple termwise vector operations. Multiplication and division are slightly more involved, but the formulas can be derived straightforwardly.</p>
+        <div class="math inBox">
+         $$\begin{aligned}
+         z_1 + z_2 &= (a + bi) + (c + di) \\
+                   &= (a + c) + i \left( b + d \right) \\
+         \\
+         z_1 - z_2 &= (a + bi) - (c + di) \\
+                   &= (a - c) + i \left( b - d \right) \\
+         \\
+         z_1 \times z_2 &= (a + bi) (c + di) \\
+                        &= ac + bci + adi - bd \\
+                        &= (ac - bd) + i \left( bc + ad \right ) \\
+         \\
+         \frac{z_1}{z_2} &= \frac{a + bi}{c + di} \\
+                         &= \frac{a + bi}{c + di} \cdot \frac{c - di}{c - di} \\
+                         &= \frac{ac + bci - adi + bd}{c^2 + d^2} \\
+                         &= \frac{\left( ac + bd \right) + i \left( bc - ad \right)}{c^2 + d^2} \\
+                         &= \left( \frac{ac + bd}{c^2 + d^2} \right) + i \left( \frac{bc - ad}{c^2 + d^2} \right)
+         \end{aligned}$$
+        </div>
+        <pre class="code inBox">
+function cplxAdd(z1, z2) {
+  return cplx(z1[0] + z2[0], z1[1] + z2[1]);
+}
+
+function cplxSub(z1, z2) {
+  return cplx(z1[0] - z2[0], z1[1] - z2[1]);
+}
+
+function cplxMul(z1, z2) {
+  var a = z1[0];
+  var b = z1[1];
+  var c = z2[0];
+  var d = z2[1];
+  var re = a*c - b*d;
+  var im = b*c + a*d;
+  var res = cplx(re, im);
+  return cplx(re, im);
+
+function cplxDiv(z1, z2) {
+  var a = z1[0];
+  var b = z1[1];
+  var c = z2[0];
+  var d = z2[1];
+  var dn = c*c + d*d;
+  var re = (a*c + b*d) / dn;
+  var im = (b*c - a*d) / dn;
+  return cplx(re, im);
+}</pre>
+        <p>A formula to compute the complex exponential function can be derived using Euler's formula, making use of the real exponential, cosine, and sine functions.</p>
+        <div class="math inBox">
+         $$\begin{aligned}
+         e^z &= e^{x + iy} \\
+             &= e^{x} e^{iy} \\
+             &= e^{x} (\cos y + i \sin y) \\
+             &= e^{x} \cos y + i \left(e^{x} \sin y \right)
+         \end{aligned}$$
+        </div>
+        <pre class="code inBox">
+function cplxExp(z) {
+  var x = z[0];
+  var y = z[1];
+  var ex = Math.exp(x);
+  var re = ex * Math.cos(y);
+  var im = ex * Math.sin(y);
+  return cplx(re, im);
+}</pre>
+        <h4>Implementing the FFT</h4>
+        <p>The Discrete Fourier transform (DFT) \( X_k \) of a discrete function \( x_n \), i.e. a sequence \( \mathbb{N} \rightarrow \mathbb{R} \) or \( \mathbb{N} \rightarrow \mathbb{C} \), is defined as follows:
+        <div class="math inBox">
+         $$ X_k = \sum _{n=0} ^{N-1} x_n \cdot e^{-i 2 \pi \frac{k}{N} n} $$
+        </div>
+        <p>By translating the summation to a simple for loop, we can derive a "brute force" way to compute the DFT of a function, which we will also refer to as the "DFT". This naive implementation is \( O(n^2) \) and therefore not suited for large inputs, but it will still serve an important role as the recursive base case of the FFT.</p>
+        <pre class="code inBox">
+function dft_generic(xs, inverse) {
+  var N = xs.length;
+  var ys = [];
+  for (var k = 0; k < N; k++) {
+    var acc = cplxFromReal(0);
+    for (var n = 0; n < N; n++) {
+      var n0 = inverse ? 2 : (-2);
+      var n1 = cplxFromReal(n0);
+      var n2 = cplxMul(n1, cpi);
+      var n3 = cplxMul(n2, j);
+      var n4 = cplxFromReal(n);
+      var n5 = cplxMul(n3, n4);
+      var n6 = cplxFromReal(k);
+      var n7 = cplxMul(n5, n6);
+      var n8 = cplxFromReal(N);
+      var n9 = cplxDiv(n7, n8);
+      var n10 = cplxExp(n9);
+      var n11 = cplxFromPair(xs[n]);
+      var n12 = cplxMul(n11, n10);
+      var n13 = cplxAdd(acc, n12);
+      acc = n13;
+    }
+    ys.push(acc);
+  }
+
+  return ys;
+}</pre>
+        <p>(Since Javascript lacks support for operator overloading, the code for complex valued arithmetic had to be manually "unrolled" and ended up being rather verbose, but this is probably unavoidable with the choice of language.)</p>
+        <br />
+        <p>Notice that there are actually two nested for loops in the preceding code. This is because the definition computes the DFT of just a single point of the input, and so obtaining the DFT of the entire input would require another layer of iteration - hence the \( O(n^2) \) running time.</p>
+        <br />
+        <p>The full FFT divides the input into the even numbered and odd numbered points, and the routine is then called recursively on each of them. The key insight of the algorithm then allows the results of the recursive calls to be reassembled into the transform of the entire input signal.</p>
+        <br /><p>[TODO: derivation of FFT]</p>
+        <pre class="code inBox">
+function fft_generic(xs, inverse) {
+  var N = xs.length;
+
+  // base case: do a brute force dft on length 2
+  if (xs.length == 2)
+    return dft_generic(xs, inverse);
+
+  var ys_half1 = [];
+  var ys_half2 = [];
+
+  var [evens, odds] = separateOddsEvens(xs);
+
+  var Es = fft_generic(evens, inverse);
+  var Os = fft_generic(odds, inverse);
+
+  // the "key" reassembly step
+  for (var k = 0; k < (N >> 1); k++) {
+    var n0 = inverse ? 2 : (-2);
+    var n1 = cplxFromReal(n0);
+    var n2 = cplxMul(n1, cpi);
+    var n3 = cplxMul(n2, j);
+    var n4 = cplxFromReal(k);
+    var n5 = cplxMul(n3, n4);
+    var n6 = cplxFromReal(N);
+    var n7 = cplxDiv(n5, n6);
+    var R = cplxExp(n7);
+    var Ek = Es[k];
+    var Ok = Os[k];
+    var ROk = cplxMul(R, Ok);
+    var yk1 = cplxAdd(Ek, ROk);
+    var yk2 = cplxSub(Ek, ROk);
+    ys_half1.push(yk1);
+    ys_half2.push(yk2);
+  }
+
+  var ys = ys_half1.concat(ys_half2);
+  return ys;
+}</pre>
+
+        <h3>Demo</h3>
+        <hr />
+        <iframe class="inBox" width="560" height="315" src="https://www.youtube.com/embed/yvKetX5DXBc?si=BhuVZoEzjUXOsFkt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+        <div id="tryFtvtDiv">
+         <a class="nft" href="ftvt.html" id="tryFtvt"> » Try ftvt yourself « </a>
+        </div>
+
+       </div>
+
+       <div id="rjx" style="display:none;">
+        <h3>rjx (byteburner)</h3>
+        <hr />
+        <p>rjx is a realtime logic circuit simulator. It allows for fine control over the simulation timeline, including the ability to go frame by frame and to run the simulation in reverse. There is a small set of basic components including basic logic gates, button/switch inputs, and several kinds of seven-segment style displays. The GUI is minimal and much of the functionality is accessed through predetermined keybinds.</p>
+        <br />
+        <p><b>Note</b>: rjx does not simulate real life digital circuits. It should be considered more of an educational or hobbyist application for the exploration of constructing abstract machines from a simple set of logical components.</p>
+        <a href="imgs/rjx/Screenshot_2024-10-05_03-54-41.png" class="ssa"></a>
+        <h3>Technical challenges</h3>
+        <hr />
+        <h4>Hash tabling</h4>
+        <p>The C standard library is limited and lacks support for common data structures like linked lists and binary trees. This necessitates either using a third party library or rolling your own library, and I usually go with the latter, partly as an educational exercise and partly so that I can understand how the library works intuitively and I don't have to decode obscure documentation. In this project, since components can be selected graphically on screen, a hash table was used to quickly map from screen coordinates to the corresponding object in memory. The hash function itself was sourced from the internet more or less verbatim, since deriving a good hash function is mathematically involved and well beyond my scope.</p>
+        <pre class="code inBox">
+typedef struct {
+  uint64_t *bfr;
+  int bkts;
+  int entries;
+} hmap_tx;
+
+typedef struct {
+  uint64_t key, val;
+} hmap_entry_tx;</pre>
+        <p>The bulk of the work involved creating a set of routines for accessing the data structure and automating its memory allocation. My personal convention for implementing data structures in C is to create standard constructor and destructor patterns for managing the lifetime of the object, so the responsibility falls on the calling routine to know when the object is no longer needed, although in other respects the process is automated, and destructors can recursively call other destructors to simplify the cleanup process. The library also takes care of resizing the hash table once a certain load factor has been reached and rehashing automatically.</p>
+        <pre class="code inBox">
+static void hmap_init(hmap_tx *h, int bkts) {
+  int bytes = BYTES_PER_BKT * bkts;
+  h->bfr = malloc(bytes);
+  ...
+}
+
+static void hmap_bfr_destroy(uint64_t *bfr, int bkts) {
+  ...
+  free(bfr);
+}
+
+static void hmap_destroy(hmap_tx *h) {
+  hmap_bfr_destroy(h->bfr, h->bkts);
+}</pre>
+        <p>I opted to use preprocessor macros to allow hash tables to be created as "instances" for individual types. C lacks true generics, but we can use macros as an ugly, if functional, workaround to emulate parametric types. Despite the clunkiness, it's still preferrable to the alternative, which is to create data structures with (void*) pointers that are then casted to various other types, but this is extremely type-unsafe and in my experience leads to painful debugging sessions of trying to pin down the cause of segmentation faults. This can be easily avoided by just initializing a different "instance" of a data structure for each needed type, even if it technically counts as code repetition.</p>
+        <h3>Screenshots</h3>
+        <hr />
+        <a href="imgs/rjx/Screenshot_2024-09-15_18-29-52.png" class="ssa"></a>
+        <a href="imgs/rjx/Screenshot_2024-11-28_04-12-20.png" class="ssa"></a>
+
+        <h3>Demo</h3>
+        <hr />
+        <iframe class="inBox" width="560" height="315" src="https://www.youtube.com/embed/m-mEatopVb8?si=m-34kWrBZL-_gr97" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+       </div>
+
+       <div id="xx" style="display:none;">
+        [[Hyperlink blocked]]
+       </div>
+
+       <div id="p4" style="display:none;">
+        [[Hyperlink blocked]]
+       </div>
+
+       <div id="aboutme" style="display:none;">
+        <h3>About me</h3>
+        <hr />
+        <p>click the links on the sidebar to view projects</p>
+       </div>
+
+       <div id="resume" style="display:none;">
+        [[Hyperlink blocked]]
+       </div>
+
       </div>
      </div>
     </div>

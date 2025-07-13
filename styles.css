@@ -89,7 +89,7 @@ body {
   font-size: max(20px, 2vh);
 }
 
-ul.bufferList, ul#rooms, ul.lstn {
+ul.lstn {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -176,18 +176,15 @@ div#chat {
 
 #usersOnline li { padding: 0.1em 0em; }
 
-li.room {
+li.navli {
   padding: 0.50vh;
   border-radius: 0.75vh;
   cursor: pointer;
-}
-
-.room {
   border: 0.1vh solid transparent;
 }
 
-/*.activeRoom {
-  border: 1px solid #888;
+/*.activeNavli {
+  border-color: #888;
 }*/
 
 #roomTitleWrapper {
@@ -224,7 +221,7 @@ h4 {
 .inBox {
   padding: 1.5vh;
   border-radius: 0.75vh;
-  background-color: rgba(48,48,48,0.75);
+  background-color: rgba(32,32,32,0.75);
   box-shadow: max(6px, 0.6vh) max(6px, 0.6vh) max(6px, 0.6vh) rgba(0, 0, 0, 0.9);
   border: 0.1vh solid #484848;
   margin: 2.0vh auto 2.0vh auto;
@@ -259,4 +256,10 @@ iframe {
 
 #tryFtvtDiv {
   text-align: center;
+}
+
+.math {
+  width: 50%;
+  text-align: center;
+  padding: 0;
 }
