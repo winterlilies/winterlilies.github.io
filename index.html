@@ -133,7 +133,7 @@ function cplxDiv(z1, z2) {
   var im = (b*c - a*d) / dn;
   return cplx(re, im);
 }</pre>
-        <p>A formula to compute the complex exponential function can be derived using Euler's formula, making use of the real exponential, cosine, and sine functions.</p>
+        <p>A formula to compute the complex exponential function can be derived using Euler's formula, making use of the real-valued exponential, cosine, and sine functions.</p>
         <div class="math inBox">
          $$\begin{aligned}
          e^z &= e^{x + iy} \\
@@ -189,7 +189,7 @@ function dft_generic(xs, inverse) {
         <br />
         <p>Notice that there are actually two nested for loops in the preceding code. This is because the definition computes the DFT of just a single point of the input, and so obtaining the DFT of the entire input would require another layer of iteration - hence the \( O(n^2) \) running time.</p>
         <br />
-        <p>The full FFT divides the input into the even numbered and odd numbered points, and the routine is then called recursively on each of them. The key insight of the algorithm then allows the results of the recursive calls to be reassembled into the transform of the entire input signal.</p>
+        <p>The full FFT divides the input into the even numbered and odd numbered points, and the routine is then called recursively on each of them. The key insight of the algorithm then allows the results of the recursive calls to be reassembled into the transform of the entire input.</p>
         <br /><p>[TODO: derivation of FFT]</p>
         <pre class="code inBox">
 function fft_generic(xs, inverse) {
