@@ -27,7 +27,7 @@
   height: 100%;
   min-height: 0; /* fucking */
   overflow: hidden;
-  border: 0.05vh solid #222;
+  border: 0.1vh solid #181818;
 }
 
 .boxtop {
