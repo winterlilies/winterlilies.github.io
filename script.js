@@ -54,8 +54,10 @@ let init_navlis = function(ul_id) {
       newli.style.borderColor = (newli.id == activeNavliStr) ? "#888" : "transparent";
     }
 
-    newli.onclick = function() {
-      setActiveNavli(newli.id);
+    if (li.getAttribute("internal") == "true") {
+      newli.onclick = function() {
+        setActiveNavli(newli.id);
+      }
     }
 
     new_children.push(newli);
