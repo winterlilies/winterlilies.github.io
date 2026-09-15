@@ -157,21 +157,21 @@
             <img src="imgs/proof/proof-main.webp" alt="A completed Fitch-style proof of Peirce's law with nested subproof bars, beside a column of typed lambda terms." loading="lazy" />
           </a>
           <h3 class="preview-title"><a href="#proof">Proof Trainer</a></h3>
-          <p class="preview-desc">Four proof systems and a Kripke model editor, in the browser.</p>
+          <p class="preview-desc">Four proof systems and a model editor in the browser.</p>
         </li>
         <li class="preview">
           <a class="preview-shot" href="#ftvt">
             <img src="imgs/ftvt/ftvt-main.webp" alt="The ftvt interface: a green signal plotted in the time domain beside its magnitude spectrum with rainbow phase colouring." loading="lazy" />
           </a>
           <h3 class="preview-title"><a href="#ftvt">ftvt</a></h3>
-          <p class="preview-desc">Fourier transforms with sliders you can drag while both plots redraw.</p>
+          <p class="preview-desc">Frequency domain visualization with sliders you can drag while both plots redraw.</p>
         </li>
         <li class="preview">
           <a class="preview-shot" href="#rjx">
             <img src="imgs/rjx/rjx-main.webp" alt="Green logic gates wired across a dark grid, with four cross-coupled latch blocks driving a seven-segment display." loading="lazy" />
           </a>
           <h3 class="preview-title"><a href="#rjx">rjx</a></h3>
-          <p class="preview-desc">A realtime logic circuit simulator in C that also runs backwards.</p>
+          <p class="preview-desc">A realtime logic circuit simulator in C.</p>
         </li>
       </ul>
 
@@ -345,7 +345,7 @@
       </figure>
 
       <!--<h2>Technical challenges</h2>-->
-      <h2>Implementing complex arithmetic in JS</h2>
+      <h2>Implementing complex arithmetic and FFT in JS</h2>
 
       <!--<h3>Implementing complex arithmetic</h3>-->
       <p>The FFT makes use of certain properties of the complex exponential function in order to break down the task recursively and enable an \( O \left( n \log n \right) \) runtime, so the ability to perform operations on complex numbers will be needed by the implementation. Javascript lacks built-in support for complex numbers, but we can work around this by using an ordered pair (actually an array of length 2) to represent the real and imaginary parts of a complex number.</p>
