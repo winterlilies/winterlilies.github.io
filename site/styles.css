@@ -508,6 +508,59 @@ a:hover { text-decoration-thickness: 2px; }
   color: var(--fg-dim);
 }
 
+/* On a phone the stacked cards are ~330px tall, so barely one lands above the
+   fold. Below the two-column breakpoint they become horizontal bars instead:
+   thumbnail left, title and description filling the rest. Card height is then
+   the taller of image and text rather than their sum. */
+@media (max-width: 619px) {
+  .article .previews { gap: 1.1rem; }
+
+  .preview {
+    position: relative;
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 0.9rem;
+    align-items: start;
+  }
+
+  .preview-shot {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .article .preview-title {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0 0 0.2rem;
+    font-size: 1.02rem;
+  }
+
+  .preview-desc {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+
+  /* the title alone is a poor tap target, so it stretches over the whole bar */
+  .article .preview-title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+
+  /* the overview's intro eats the fold on a phone; tighten what surrounds it */
+  #home { padding-top: 1.5rem; }
+  #home .article-head { margin-bottom: 1.25rem; }
+  #home h2 { margin-top: 1.5rem; }
+}
+
+@media (max-width: 380px) {
+  .preview { grid-template-columns: 6.75rem minmax(0, 1fr); column-gap: 0.75rem; }
+}
+
 /* ---------- code ---------- */
 .code {
   margin: 1.5rem 0;
