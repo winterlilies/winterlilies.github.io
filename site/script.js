@@ -111,6 +111,25 @@
 
   /* ---------------- router ---------------- */
 
+  /* The hash is a router target, not an anchor, but the browser doesn't know that:
+     on a fresh load of `index.html#climate` it scrolls that element to the top of
+     the viewport, which on mobile tucks the article header under the sticky bar.
+     route() runs while the document is still parsing, so its reset happens before
+     that scroll — hence a second, one-shot reset once loading is done. */
+  function resetScroll() {
+    if (content) content.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', function once() {
+      window.removeEventListener('load', once);
+      resetScroll();
+    });
+  }
+
   var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
 
   function hashId() {
@@ -138,8 +157,7 @@
       else link.removeAttribute('aria-current');
     });
 
-    if (content) content.scrollTop = 0;
-    window.scrollTo(0, 0);
+    resetScroll();
   }
 
   window.addEventListener('hashchange', route);
