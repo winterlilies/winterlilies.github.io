@@ -1,11 +1,630 @@
-<!DOCTYPE html>
-<html>
- <head>
-  <title>winterlilies.github.io</title>
- </head>
- <body>
-  <p>hi, you might be looking for:</p>
-  <p><a href="https://neon-klepon-88a86b.netlify.app/">us weather explorer</a> - explore climate metrics with maps (made w/ claude code)</p>
-  <p><a href="ftvt.html">ftvt</a> - fourier transform visualizer</p>
- </body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>project portfolio</title>
+<meta name="description" content="Project portfolio: interactive climate mapping, a formal-logic proof trainer, a Fourier transform visualizer, and a realtime logic circuit simulator." />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23654735'/%3E%3Cpath d='M8 21.5c3.2 0 3.2-11 6.4-11s3.2 11 6.4 11 3.2-11 3.2-11' stroke='%23f2e5bc' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+<script>
+  /* apply the stored theme before first paint to avoid a flash of the wrong one */
+  try {
+    var t = localStorage.getItem('folio-theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+</script>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'annotation', 'annotation-xml']
+    },
+    startup: {
+      typeset: false,
+      pageReady() {
+        return MathJax.startup.defaultPageReady().then(function () {
+          window.__mathReady = true;
+          if (window.__typesetActive) window.__typesetActive();
+        });
+      }
+    }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body data-view="detail">
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="shell">
+
+  <div class="scrim" data-close-drawer></div>
+
+  <!-- ============ SIDEBAR / MOBILE INDEX ============ -->
+  <aside class="sidebar" id="sidebar" tabindex="-1">
+    <div class="brand">
+      <div class="brand-row">
+        <a class="brand-name" href="#home">tracy w</a>
+        <div class="brand-actions">
+          <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode">
+          <span class="knob" aria-hidden="true">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.6"/><path d="M12 1.4v2.5M12 20.1v2.5M3.8 3.8l1.8 1.8M18.4 18.4l1.8 1.8M1.4 12h2.5M20.1 12h2.5M3.8 20.2l1.8-1.8M18.4 5.6l1.8-1.8"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          </span>
+        </button>
+          <button class="drawer-close" type="button" aria-label="Close menu" data-close-drawer>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg>
+          </button>
+        </div>
+      </div>
+      <p class="brand-role">pointfree in modal dress<!--transient high-frequency spike--></p>
+    </div>
+
+    <nav class="nav" aria-label="Sections">
+
+      <p class="nav-label" id="lbl-projects">Projects</p>
+      <ul class="nav-list" aria-labelledby="lbl-projects">
+        <li><a class="nav-item" href="#home">
+          <span class="nav-title">overview</span>
+          <span class="nav-desc">about me</span>
+        </a></li>
+        <li><a class="nav-item" href="#climate">
+          <span class="nav-title">climate explorer</span>
+          <span class="nav-desc">interactive climate mapping</span>
+        </a></li>
+        <li><a class="nav-item" href="#proof">
+          <span class="nav-title">proof trainer</span>
+          <span class="nav-desc">for learning to write formal proofs</span>
+        </a></li>
+        <li><a class="nav-item" href="#ftvt">
+          <span class="nav-title">ftvt</span>
+          <span class="nav-desc">frequency domain visualizer</span>
+        </a></li>
+        <li><a class="nav-item" href="#rjx">
+          <span class="nav-title">rjx</span>
+          <span class="nav-desc">realtime logic circuit simulator</span>
+        </a></li>
+      </ul>
+
+      <p class="nav-label" id="lbl-more">More</p>
+      <ul class="nav-list" aria-labelledby="lbl-more">
+        <!-- Drop resume.pdf next to index.html and uncomment to enable:
+        <li><a class="nav-item" href="resume.pdf">
+          <span class="nav-title">Résumé<span class="ext-mark">↗</span></span>
+          <span class="nav-desc">PDF</span>
+        </a></li>
+        -->
+        <li><a class="nav-item" href="https://github.com/winterlilies" target="_blank" rel="noopener noreferrer">
+          <span class="nav-title">GitHub<span class="ext-mark">↗</span></span>
+          <span class="nav-desc">github.com/winterlilies</span>
+        </a></li>
+        <!--<li><a class="nav-item" href="https://www.linkedin.com/in/tracy-wu-50b927375/" target="_blank" rel="noopener noreferrer">
+          <span class="nav-title">LinkedIn<span class="ext-mark">↗</span></span>
+          <span class="nav-desc">linkedin.com/in/tracy-wu</span>
+        </a></li>-->
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ============ CONTENT ============ -->
+  <main class="content" id="main">
+
+    <div class="mobile-bar">
+      <button class="hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17"/></svg>
+      </button>
+      <a class="mobile-title" href="#home">tracy w</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode">
+        <span class="knob" aria-hidden="true">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.6"/><path d="M12 1.4v2.5M12 20.1v2.5M3.8 3.8l1.8 1.8M18.4 18.4l1.8 1.8M1.4 12h2.5M20.1 12h2.5M3.8 20.2l1.8-1.8M18.4 5.6l1.8-1.8"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- ---------------- OVERVIEW (landing) ---------------- -->
+    <article class="article" id="home" aria-labelledby="home-h">
+      <header class="article-head">
+        <!--<p class="eyebrow">about me</p>-->
+        <h1 id="home-h">project portfolio</h1>
+        <!--<p class="subtitle">Systems, signals and symbolic logic &mdash; things that are easier to understand once you can watch them move.</p>-->
+      </header>
+
+      <!--<p class="lede">Most of what I make starts the same way: I want to understand something, the explanation I can find is static, and I&rsquo;d rather be able to poke at it. That is how a Fourier transform became a tool with a parameter slider, and how a logic textbook became a proof checker that shows you the countermodel when you are stuck.</p>-->
+      <p class="lede">My projects occupy a weird space between educational tool and simulation game. I find that the most effective way to really learn things is to have a sandbox where you can internalize the behavior of the system from the bottom up; these projects were downstream of the frustration that no such tool existed.</p>
+
+      <!--<div class="note">
+        <p><strong>Placeholder intro.</strong> Replace these two paragraphs with your own &mdash; where you are, what you are looking for, and whatever the projects below don&rsquo;t already say.</p>
+      </div>-->
+
+      <h2>Projects</h2>
+      <ul class="previews">
+        <li class="preview">
+          <a class="preview-shot" href="#climate">
+            <img src="imgs/climate/climate-main.webp" alt="A map of the United States with every county shaded by annual precipitation, from deep red in the arid southwest to blue and violet along the Pacific northwest coast." loading="lazy" />
+          </a>
+          <h3 class="preview-title"><a href="#climate">climate explorer</a></h3>
+          <p class="preview-desc">interactive climate mapping from thirty-year normals</p>
+        </li>
+        <li class="preview">
+          <a class="preview-shot" href="#proof">
+            <img src="imgs/proof/proof-main.webp" alt="A completed Fitch-style proof of Peirce's law with nested subproof bars, beside a column of typed lambda terms." loading="lazy" />
+          </a>
+          <h3 class="preview-title"><a href="#proof">proof trainer</a></h3>
+          <p class="preview-desc">tool for learning to write formal proofs in four logical systems</p>
+        </li>
+        <li class="preview">
+          <a class="preview-shot" href="#ftvt">
+            <img src="imgs/ftvt/ftvt-main.webp" alt="The ftvt interface: a green signal plotted in the time domain beside its magnitude spectrum with rainbow phase colouring." loading="lazy" />
+          </a>
+          <h3 class="preview-title"><a href="#ftvt">ftvt</a></h3>
+          <p class="preview-desc">frequency domain visualizer with sliders that redraw in real time</p>
+        </li>
+        <li class="preview">
+          <a class="preview-shot" href="#rjx">
+            <img src="imgs/rjx/rjx-main.webp" alt="Green logic gates wired across a dark grid, with four cross-coupled latch blocks driving a seven-segment display." loading="lazy" />
+          </a>
+          <h3 class="preview-title"><a href="#rjx">rjx</a></h3>
+          <p class="preview-desc">realtime logic circuit simulator inspired by computational redstone</p>
+        </li>
+      </ul>
+
+      <!--<p class="colophon">Typefaces used: Outfit, Red Hat Text, Inconsolata. Math rendered with MathJax.</p>-->
+    </article>
+
+    <!-- ---------------- CLIMATE EXPLORER ---------------- -->
+    <article class="article" id="climate" aria-labelledby="climate-h">
+      <header class="article-head">
+        <!--<p class="eyebrow">Project</p>-->
+        <h1 id="climate-h">climate explorer <span class="subtitle">(made with Claude)</span></h1>
+        <p class="subtitle">An interactive map of thirty-year climate normals across the United States, Canada and Europe — 4,950 regions, fourteen metrics, month by month.</p>
+      </header>
+
+      <p class="lede">Climate Explorer is an interactive map tool for visualizing climate data down to county level. Every metric colors the map according to a color gradient, then lets you examine any one of them for a monthly breakdown. The project was inspired by attempts to optimize for the age-old question of <em>"where is the weather nice, and for how much of the year?"</em>, but grew into a more general purpose tool.</p>
+
+      <figure class="figure">
+        <img src="imgs/climate/climate-main.webp" alt="Choropleth map of the United States with every county shaded by annual precipitation, from deep red in the arid southwest through pale yellow in the plains to blue and violet along the Pacific northwest coast." loading="lazy" width="1800" height="1125" />
+        <figcaption>Annual precipitation across all 3,143 US counties.</figcaption>
+      </figure>
+
+      <h2>What it does</h2>
+
+      <h3>Climate Explorer mode</h3>
+      <p>The default mode shades the map by one metric at a time. An Annual/Monthly toggle steps through individual months with a slider or autoplays them as an animation, which lets you visualize seasonal phenomena like the North American monsoon or the west coast rainy season. Fourteen metrics are available across three groups:</p>
+      <ul>
+        <li><strong>Precipitation</strong> — precipitation, precipitation days, snowfall, snow days</li>
+        <li><strong>Atmosphere</strong> — dew point, relative humidity, cloud cover, sunshine hours</li>
+        <li><strong>Temperature</strong> — average high, average low, mean, diurnal range, frost days, hot days</li>
+      </ul>
+      <p>Clicking any region opens a detail popup with the monthly series behind every metric, either focused on the current one or as a full grid.</p>
+
+      <figure class="figure">
+        <img src="imgs/climate/climate-popup.webp" alt="Detail popup for Madison, Idaho showing a grid of twelve monthly charts grouped under Precipitation, Atmosphere and Temperature headings, each with an annual summary figure beneath it." loading="lazy" width="1800" height="1125" />
+        <figcaption>The All Metrics view of a single county.</figcaption>
+      </figure>
+
+      <h3>Comfortable Days mode</h3>
+      <!--<p>The second mode is the one I built the whole thing for. You define up to several simultaneous criteria — a temperature range, a dew point ceiling, precipitation, snowfall, cloud cover — and the map colours each region by how many days a year satisfy <em>all</em> of them.</p>-->
+      <!--<p>The estimate uses a normal-distribution model: each metric is treated as normally distributed around its monthly mean, the criteria are treated as independent, and the probability that all of them hold on a given day is the product of the individual probabilities. That probability is multiplied by the number of days in the month and summed over the year. Independence is a real simplification — dew point and temperature are obviously correlated — but it holds up well enough to rank places against each other, which is what the map is for.</p>-->
+      <p>In this mode, you can set an arbitrary list of requirements for what constitutes a "comfortable day" - a temperature range, dew point ceiling, precipitation, snowfall, cloud cover - and the map gets colored in by how many days a year satisfy all the conditions.</p>
+
+      <figure class="figure">
+        <img src="imgs/climate/climate-comfort.webp" alt="Comfortable Days map of the United States with two criteria active, daily high between 40 and 80 degrees Fahrenheit and dew point at or below 65. The Pacific northwest coast glows orange for the highest counts while Florida and the Gulf coast are dark blue." loading="lazy" width="1800" height="1125" />
+        <figcaption>Daily high between 40–80 °F and dew point ≤ 65 °F.<!--The coastal Pacific northwest wins outright; the Gulf coast is eliminated by dew point alone.--></figcaption>
+      </figure>
+
+      <h3>Four map views</h3>
+      <p>Each region set gets a projection appropriate to its latitude rather than one global compromise.</p>
+      <dl class="spec">
+        <div><dt>US only</dt><dd>Albers USA composite — lower 48 with Alaska and Hawai‘i insets · 3,143 counties</dd></div>
+        <div><dt>North America</dt><dd>Albers conic, standard parallels 30°/60° · US counties + Canadian census divisions</dd></div>
+        <div><dt>Canada</dt><dd>Lambert conformal conic, parallels 49°/77° · 293 census divisions</dd></div>
+        <div><dt>Europe</dt><dd>EPSG:3035, pre-projected from Nuts2json · 1,514 NUTS-3 regions</dd></div>
+      </dl>
+
+      <figure class="figure">
+        <img src="imgs/climate/climate-europe.webp" alt="Map of Europe divided into small NUTS-3 regions shaded by annual mean temperature, cool blue-green across Scandinavia grading to yellow around the Mediterranean, with the Alps visible as a cool band." loading="lazy" width="1800" height="1125" />
+        <figcaption>Annual mean temperature over 1,514 NUTS-3 regions, from ERA5 reanalysis. The Alps and the Pyrenees show up as cool bands without any special-casing.</figcaption>
+      </figure>
+
+      <h2>Where the data comes from</h2>
+      <p><!--Most of the work in this project was not the map.-->A good part of the work for this project was actually not the map UI but instead the task of assembling a single coherent dataset out of three national and supranational sources that disagree about periods, units, station density and what counts as a hot day.</p>
+      <dl class="spec">
+        <div><dt>United States</dt><dd>NOAA Climate Normals 1991–2020, fetched through the ACIS/NCEI API and inverse-distance-weighted to county centroids</dd></div>
+        <div><dt>Canada</dt><dd>ECCC Climate Normals 1981–2010, IDW to census division centroids</dd></div>
+        <div><dt>Europe</dt><dd>ERA5 monthly averaged reanalysis 1991–2020 from the Copernicus CDS, regridded to NUTS-3</dd></div>
+        <div><dt>Cloud &amp; sunshine</dt><dd>NASA POWER satellite reanalysis where no station observations exist</dd></div>
+      </dl>
+      <!--<p>Two metrics are derived rather than observed. Relative humidity comes from dew point and mean temperature via the August–Roche–Magnus approximation. Sunshine hours come from the clearness index through the Ångström–Prescott formula, which is an indirect estimate with a root-mean-square error of roughly 160 hours a year.</p>-->
+
+      <!--<div class="note">
+        <p><strong>One honest caveat, surfaced in the app itself.</strong> The Hot Days metric mixes two definitions. US data uses the NCEI <code>GRTH090</code> normal, days above 90 °F; Canada uses the ECCC <em>GT 30 °C</em> normal, days above 86 °F. So Canadian counts run modestly higher than neighbouring US counties at equivalent climates, and the border is faintly visible in that one metric. Both the legend and the detail popup annotate it rather than quietly papering over it.</p>
+      </div>
+      <p>Counties with no station within 150 km (500 km in Canada) are flagged as interpolated, and a further 339 contiguous-US counties absent from NOAA entirely are filled from their nearest neighbour and flagged the same way. The region count in the sidebar reports how many of each are interpolated.</p>-->
+
+      <h2>How it is built</h2>
+      <p>Vanilla JavaScript with D3 v7 and TopoJSON, a single <code>index.html</code> entry point and one <code>app.js</code>, no build step and no bundler. Geometry is pulled from CDN at runtime (us-atlas and Nuts2json); the climate data itself is precomputed into static JSON so the app loads without a backend. Around thirty Python scripts were written the fetching, interpolation and patching offline.</p><!-- — the part that took the time and that nobody sees.</p> -->
+
+      <h2>Demo</h2>
+      <figure class="figure">
+        <a class="video" href="https://www.youtube.com/watch?v=8VgyUR9wnjo" target="_blank" rel="noopener noreferrer">
+          <img src="imgs/video/climate-thumb.jpg" alt="Video thumbnail: the Climate Explorer showing a US county map coloured by March precipitation days, with the monthly timeline open." loading="lazy" width="1280" height="720" />
+          <span class="video-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.2-5.8z"/></svg></span>
+        </a>
+        <figcaption>Demo of the Climate Explorer, stepping through the monthly view &mdash; opens on YouTube in a new tab.</figcaption>
+      </figure>
+
+      <!--<div class="note note-vibe">
+        <p><strong>Vibe coded.</strong> The bulk of this codebase was written by an LLM. I chose the data sources, decided the interpolation strategy and the comfortable-days model, made the cartographic and interface calls, and checked the output against the source normals — but I did not type most of the ~4,200 lines of <code>app.js</code>. Flagging it because provenance seems worth stating plainly.</p>
+      </div>-->
+    </article>
+
+    <!-- ---------------- PROOF TRAINER ---------------- -->
+    <article class="article" id="proof" aria-labelledby="proof-h">
+      <header class="article-head">
+        <!--<p class="eyebrow">Project</p>-->
+        <h1 id="proof-h">Proof Trainer <span class="subtitle">(made with Claude)</span></h1>
+        <p class="subtitle">An in-browser tool for learning formal logic: four proof systems, a Kripke model editor, and a Curry–Howard panel that shows you the program hiding inside your proof.</p>
+      </header>
+
+      <!--<p class="lede">Every logic textbook I have used presents natural deduction, sequent calculus and Hilbert systems in separate chapters and leaves the reader to feel the relationship between them. Proof Trainer puts all of them behind the same problem set, so the same theorem can be proved four different ways and the differences stop being abstract.</p>-->
+      <p class="lede">As a child of the digital era, I was always frustrated by how slow traditional education was to adopt the new tools that are available. Math/logic is a prime candidate for this kind of thing - correctness is computer-verifiable, and solution traces often consist of a discrete chain of steps that can be mechanically checked. To be fair, this project was inspired by an existing university course website with an interactive JS-based proof builder; this one just goes much further, handling not just fitch-style propositional ND but also sequent calculus, Hilbert style calculus, and first-order logic. The curriculum also emphasizes the nuances of intuistionstic vs. classical logic where they appear; the strength required to prove a given problem is always given, and in some cases, the task of showing a statement that is classically valid but intuionistically unprovable is the whole deal.</p>
+
+      <figure class="figure">
+        <img src="imgs/proof/proof-main.webp" alt="A completed Fitch-style natural deduction proof of Peirce's law on the left, with nested subproof bars, beside a column of typed lambda terms culminating in a call-cc expression." loading="lazy" width="1800" height="1050" />
+        <figcaption>Peirce's law in classical natural deduction, with the Curry–Howard panel open. The proof's λ-term needs <code>callcc</code> — which is exactly why the theorem is not intuitionistically provable.</figcaption>
+      </figure>
+
+      <h2>The systems</h2>
+      <dl class="spec">
+        <div><dt>Natural deduction</dt><dd>Fitch-style, scope-aware, with nested subproofs and eigenvariable boxes for ∀I and ∃E</dd></div>
+        <div><dt>Sequent calculus</dt><dd>LK for classical and LJ for intuitionistic, built bottom-up as a tree</dd></div>
+        <div><dt>Hilbert system</dt><dd>Axiom schemas plus modus ponens and generalisation, on flat numbered lines</dd></div>
+        <div><dt>Hilbert + DT</dt><dd>The same axioms with the deduction theorem as a Fitch-style closer</dd></div>
+        <div><dt>Kripke semantics</dt><dd>A click-to-build poset editor for reading off forcing and constructing countermodels</dd></div>
+      </dl>
+      <p>Every system supports both intuitionistic and classical logic, with the relevant rules surfaced or hidden per problem, and the propositional core extends to first-order logic — quantifiers, predicates, terms and eigenvariable side conditions — in all four proof systems.</p>
+
+      <figure class="figure">
+        <img src="imgs/proof/proof-sequent.webp" alt="A sequent calculus proof tree for Peirce's law in LK, four nested sequents deep, with the two leaf sequents highlighted green and a banner reading Proof complete." loading="lazy" width="1800" height="1050" />
+        <figcaption>Peirce's law again, this time in LK.<!--The curriculum deliberately pairs it with the same theorem in LJ, where you get stuck — the right-hand side can only hold one formula, and that is the whole difference.--></figcaption>
+      </figure>
+
+      <h2>Countermodels, not just failure</h2>
+      <!--<p>The part I find most useful when learning is that being stuck is treated as information. If a problem is not provable in the logic you are currently in, the countermodel finder will say so constructively: a truth assignment for classical logic, or a bounded search over small Kripke models — up to four worlds — for intuitionistic.</p>
+      <p>The semantics module turns this into its own set of exercises. Model-check problems hand you a fixed model and ask what is forced at the root; model-build problems give you a goal and let you edit a poset of worlds directly, toggling atoms with monotonicity enforced live while a validator and an explainer narrate why the goal does or does not hold at each world.</p>-->
+      <p>Showing that a statement is false in classical logic is easy - just find a truth assignment where the statement doesn't hold. On the other hand, to show a statement has no proof in intuitionistic logic, the standard approach is to build a Kripke countermodel, which the app features in its own part of the curriculum with an interactive model builder.</p>
+      <p>Intuitionistic logic is notable for having a "richer" structure than classical logic. For example, in classical logic, a consequence of LEM is that <code>¬¬p ⊢ p</code> holds, meaning irrefutable statements are always provable - this is intuitive enough. In IL, however, it's more complicated - you can find statements, like instances of LEM itself <code>p ∨ ¬p</code>, where you can prove the negation of the negation of the statement, but not the statement itself; i.e., <code>⊢ ¬¬(p ∨ ¬p)</code>, but <code>⊬ p ∨ ¬p</code>.
+
+      <figure class="figure">
+        <img src="imgs/proof/proof-kripke.webp" alt="The Kripke model editor showing two circular worlds labelled w0 and w1 joined by an arrow, with an atom chip P unlit under w0 and lit under w1. A live forcing panel reads Goal P or not-P, not forced." loading="lazy" width="1800" height="1050" />
+        <figcaption>The canonical two-world refutation of excluded middle: a root that has not decided P yet, and a future where it has.<!-- The forcing readout updates as you edit.--></figcaption>
+      </figure>
+
+      <h2>Curry–Howard</h2>
+      <p>A toggleable side panel mirrors every natural-deduction and Hilbert proof as a typed λ-term, line for line, including dependent Π and Σ types for first-order goals. Implication introduction becomes lambda abstraction, conjunction becomes a pair, disjunction becomes a sum with <code>inl</code>/<code>inr</code>, and case analysis becomes a <code>case</code> expression.<!-- Watching the term appear beside the proof is the clearest explanation of propositions-as-types I know of, largely because you don't have to take anyone's word for the correspondence — you can watch it hold, line by line, on a proof you just built yourself.--></p>
+
+      <!--<h2>Curriculum</h2>
+      <p>Around 150 problems are graded across the five systems, sorted by complexity, with each level introducing new rules and explaining them up front. Some deliberate structure in the ordering:</p>
+      <ul>
+        <li>Natural deduction levels 1–5 build the intuitionistic rules one at a time; level 6 introduces classical reasoning, where the same problems that were impossible suddenly open up.</li>
+        <li>Level 8 is a gallery of the classical principles — DNE, LEM, RAA, Peirce — where each problem hides all but one and asks you to derive another from it.</li>
+        <li>The Hilbert levels are tedious on purpose. The famous five-line proof of <code>P → P</code> lands early, and Hilbert+DT exists precisely so you can feel the contrast when the same theorems drop to three or four lines.</li>
+        <li>The Kripke levels pair one-to-one with the sequent calculus "you will get stuck" problems: each countermodel explains a specific LJ derivation failure.</li>
+      </ul>
+      <p>Hints are tiered — each click reveals a little more — and progress on every problem, undo history included, persists to <code>localStorage</code>. There is also a free-form mode for defining your own premises and goal in any of the systems, with the countermodel finder and Curry–Howard panel working exactly as they do on curriculum problems.</p>-->
+
+      <h2>How it is built</h2>
+      <p>Vanilla JavaScript ES modules with no dependencies and no build step; a small bundled dev server exists only because ES modules will not load over <code>file://</code>. Each proof engine is a standalone module that knows nothing about the DOM, and the UI dispatches per system — adding a new logic means writing an engine plus its render and control functions, and nothing else moves.</p>
+      <p>Correctness is enforced by three Node test suites: one over the parser, all four engines, the first-order machinery and the Curry–Howard translation; one that replays every authored curriculum solution and checks the proof actually closes; and one over the Kripke editor, validator and explainer.</p>
+
+      <!--<div class="note note-vibe">
+        <p><strong>Vibe coded.</strong> As with the Climate Explorer, most of these ~13,700 lines were written by an LLM. What is mine: the choice of systems and how they are ordered pedagogically, the curriculum design and level progression, the decision to make countermodels first-class, and the testing that keeps it honest — the solution-replay suite means every authored problem is verified to be solvable rather than assumed to be.</p>
+      </div>-->
+    </article>
+
+    <!-- ---------------- FTVT ---------------- -->
+    <article class="article" id="ftvt" aria-labelledby="ftvt-h">
+      <header class="article-head">
+        <!--<p class="eyebrow">Project</p>-->
+        <h1 id="ftvt-h">ftvt</h1>
+        <p class="subtitle">Fourier transform visualization tool — symbolic signals in, spectrum out, with a slider you can drag while watching both plots move.</p>
+      </header>
+
+      <p class="lede">ftvt is a tool for visualizing Fourier transforms in one dimension. Signals are entered as mathematical expressions in symbolic notation, which are then parsed into evaluable functions, sampled over an interval, sent through the FFT algorithm, and finally plotted side by side with the original signal. By default, the plots in both the time domain and the frequency domain are updated automatically whenever the entered expression is edited. A key feature is the Desmos-style "slider" feature that allows you to smoothly adjust a parameter of the signal while viewing the effects to the transformed function in real time. There is also a filtering function with low pass, high pass, band pass, and band stop filters which works in much the same way.</p>
+
+      <figure class="figure">
+        <img src="imgs/ftvt/ftvt-main.webp" alt="The ftvt interface: a step-gated sine wave plotted in green on the left, its magnitude spectrum with rainbow phase colouring on the right, and the expression input with parameter sliders below." loading="lazy" />
+        <figcaption>The default two-pane view. Here <code>u(x-b)*sin(a*x)</code> — a step-gated sine — with <em>a</em> and <em>b</em> on sliders below.</figcaption>
+      </figure>
+
+      <!--<h2>Technical challenges</h2>-->
+      <h2>Implementing complex arithmetic and FFT in JS</h2>
+
+      <!--<h3>Implementing complex arithmetic</h3>-->
+      <p>The FFT makes use of certain properties of the complex exponential function in order to break down the task recursively and enable an \( O \left( n \log n \right) \) runtime, so the ability to perform operations on complex numbers will be needed by the implementation. Javascript lacks built-in support for complex numbers, but we can work around this by using an ordered pair (actually an array of length 2) to represent the real and imaginary parts of a complex number.</p>
+
+      <div class="math">\[ z = x + iy \Longleftrightarrow [x,y] \]</div>
+
+      <pre class="code"><code>function cplx(re, im) {
+  return [re, im];
+}
+
+function cplxFromReal(re) {
+  return [re, 0];
+}</code></pre>
+
+      <p>All the mathematical operations needed by the algorithm were then implemented manually. Addition and subtraction are simple termwise vector operations. Multiplication and division are slightly more involved, but the formulas are straightforward to derive.</p>
+
+      <div class="math">$$\begin{aligned}
+      z_1 + z_2 &= (a + bi) + (c + di) \\
+                &= (a + c) + i \left( b + d \right) \\
+      \\
+      z_1 - z_2 &= (a + bi) - (c + di) \\
+                &= (a - c) + i \left( b - d \right) \\
+      \\
+      z_1 \times z_2 &= (a + bi) (c + di) \\
+                     &= ac + bci + adi - bd \\
+                     &= (ac - bd) + i \left( bc + ad \right ) \\
+      \\
+      \frac{z_1}{z_2} &= \frac{a + bi}{c + di} \\
+                      &= \frac{a + bi}{c + di} \cdot \frac{c - di}{c - di} \\
+                      &= \frac{ac + bci - adi + bd}{c^2 + d^2} \\
+                      &= \frac{\left( ac + bd \right) + i \left( bc - ad \right)}{c^2 + d^2} \\
+                      &= \left( \frac{ac + bd}{c^2 + d^2} \right) + i \left( \frac{bc - ad}{c^2 + d^2} \right)
+      \end{aligned}$$</div>
+
+      <pre class="code"><code>function cplxAdd(z1, z2) {
+  return cplx(z1[0] + z2[0], z1[1] + z2[1]);
+}
+
+function cplxSub(z1, z2) {
+  return cplx(z1[0] - z2[0], z1[1] - z2[1]);
+}
+
+function cplxMul(z1, z2) {
+  var a = z1[0];
+  var b = z1[1];
+  var c = z2[0];
+  var d = z2[1];
+  var re = a*c - b*d;
+  var im = b*c + a*d;
+  var res = cplx(re, im);
+  return cplx(re, im);
+}
+
+function cplxDiv(z1, z2) {
+  var a = z1[0];
+  var b = z1[1];
+  var c = z2[0];
+  var d = z2[1];
+  var dn = c*c + d*d;
+  var re = (a*c + b*d) / dn;
+  var im = (b*c - a*d) / dn;
+  return cplx(re, im);
+}</code></pre>
+
+      <p>A formula to compute the complex exponential function can be derived using Euler's formula, making use of the real-valued exponential, cosine, and sine functions.</p>
+
+      <div class="math">$$\begin{aligned}
+      e^z &= e^{x + iy} \\
+          &= e^{x} e^{iy} \\
+          &= e^{x} (\cos y + i \sin y) \\
+          &= e^{x} \cos y + i \left(e^{x} \sin y \right)
+      \end{aligned}$$</div>
+
+      <pre class="code"><code>function cplxExp(z) {
+  var x = z[0];
+  var y = z[1];
+  var ex = Math.exp(x);
+  var re = ex * Math.cos(y);
+  var im = ex * Math.sin(y);
+  return cplx(re, im);
+}</code></pre>
+
+      <h3>Implementing the FFT</h3>
+      <p>The Discrete Fourier transform (DFT) \( X_k \) of a discrete function \( x_n \), i.e. a sequence \( \mathbb{N} \rightarrow \mathbb{R} \) or \( \mathbb{N} \rightarrow \mathbb{C} \), is defined as follows:</p>
+
+      <div class="math">$$ X_k = \sum _{n=0} ^{N-1} x_n \cdot e^{-i 2 \pi \frac{k}{N} n} $$</div>
+
+      <p>By translating the summation to a simple for loop, we can derive a "brute force" way to compute the DFT of a function, which we will also refer to as the "DFT". This naive implementation is \( O(n^2) \) and therefore not suited for large inputs, but it will still serve an important role as the recursive base case of the FFT.</p>
+
+      <pre class="code"><code>function dft_generic(xs, inverse) {
+  var N = xs.length;
+  var ys = [];
+  for (var k = 0; k &lt; N; k++) {
+    var acc = cplxFromReal(0);
+    for (var n = 0; n &lt; N; n++) {
+      var n0 = inverse ? 2 : (-2);
+      var n1 = cplxFromReal(n0);
+      var n2 = cplxMul(n1, cpi);
+      var n3 = cplxMul(n2, j);
+      var n4 = cplxFromReal(n);
+      var n5 = cplxMul(n3, n4);
+      var n6 = cplxFromReal(k);
+      var n7 = cplxMul(n5, n6);
+      var n8 = cplxFromReal(N);
+      var n9 = cplxDiv(n7, n8);
+      var n10 = cplxExp(n9);
+      var n11 = cplxFromPair(xs[n]);
+      var n12 = cplxMul(n11, n10);
+      var n13 = cplxAdd(acc, n12);
+      acc = n13;
+    }
+    ys.push(acc);
+  }
+
+  return ys;
+}</code></pre>
+
+      <p>(Since Javascript lacks support for operator overloading, the code for complex valued arithmetic had to be manually "unrolled" and ended up being rather verbose, but this is probably unavoidable with the choice of language.)</p>
+
+      <p>Notice that there are actually two nested for loops in the preceding code. This is because the definition computes the DFT of just a single point of the input, and so obtaining the DFT of the entire input would require another layer of iteration - hence the \( O(n^2) \) running time.</p>
+
+      <p>The full FFT divides the input into the even numbered and odd numbered points, and the routine is then called recursively on each of them. The key insight of the algorithm then allows the results of the recursive calls to be reassembled into the transform of the entire input.</p>
+
+      <div class="note note-todo">
+        <p><strong>TODO: derivation of FFT.</strong> This section is unfinished — the reassembly step below is stated but not yet derived.</p>
+      </div>
+
+      <pre class="code"><code>function fft_generic(xs, inverse) {
+  var N = xs.length;
+
+  // base case: do a brute force dft on length 2
+  if (xs.length == 2)
+    return dft_generic(xs, inverse);
+
+  var ys_half1 = [];
+  var ys_half2 = [];
+
+  var [evens, odds] = separateOddsEvens(xs);
+
+  var Es = fft_generic(evens, inverse);
+  var Os = fft_generic(odds, inverse);
+
+  // the "key" reassembly step
+  for (var k = 0; k &lt; (N &gt;&gt; 1); k++) {
+    var n0 = inverse ? 2 : (-2);
+    var n1 = cplxFromReal(n0);
+    var n2 = cplxMul(n1, cpi);
+    var n3 = cplxMul(n2, j);
+    var n4 = cplxFromReal(k);
+    var n5 = cplxMul(n3, n4);
+    var n6 = cplxFromReal(N);
+    var n7 = cplxDiv(n5, n6);
+    var R = cplxExp(n7);
+    var Ek = Es[k];
+    var Ok = Os[k];
+    var ROk = cplxMul(R, Ok);
+    var yk1 = cplxAdd(Ek, ROk);
+    var yk2 = cplxSub(Ek, ROk);
+    ys_half1.push(yk1);
+    ys_half2.push(yk2);
+  }
+
+  var ys = ys_half1.concat(ys_half2);
+  return ys;
+}</code></pre>
+
+      <h2>Screenshots</h2>
+      <figure class="figure">
+        <img src="imgs/ftvt/ftvt-1.webp" alt="ftvt showing a windowed oscillating signal on the left and its transform plotted as separate real and imaginary parts on the right, with four parameter sliders beneath." loading="lazy" />
+        <figcaption>Four named parameters bound to sliders, with the transform drawn as separate real and imaginary parts.</figcaption>
+      </figure>
+      <figure class="figure">
+        <img src="imgs/ftvt/ftvt-2.webp" alt="ftvt in magnitude mode with phase colouring enabled, the frequency-domain peaks rendered in rainbow hues against a black background." loading="lazy" />
+        <figcaption>Magnitude mode with phase colouring on — hue encodes the argument of each complex coefficient.</figcaption>
+      </figure>
+      <figure class="figure">
+        <img src="imgs/ftvt/ftvt-3.webp" alt="ftvt showing a square wave in the time domain beside its harmonic spectrum, with a low-pass filter overlay shading part of the frequency axis." loading="lazy" />
+        <figcaption>A square wave and its harmonics, with the symmetric low-pass filter overlay shading the frequency axis.</figcaption>
+      </figure>
+
+      <h2>Demo</h2>
+      <figure class="figure">
+        <a class="video" href="https://www.youtube.com/watch?v=yvKetX5DXBc" target="_blank" rel="noopener noreferrer">
+          <img src="imgs/video/ftvt-thumb.jpg" alt="Video thumbnail: the ftvt interface with a signal and its transform side by side." loading="lazy" width="1280" height="720" />
+          <span class="video-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.2-5.8z"/></svg></span>
+        </a>
+        <figcaption>Demo of ftvt &mdash; opens on YouTube in a new tab.</figcaption>
+      </figure>
+
+      <!-- Add ftvt.html next to index.html and uncomment to offer the live tool:
+      <div class="linkrow"><a class="button" href="ftvt.html">» Try ftvt yourself «</a></div>
+      -->
+    </article>
+
+    <!-- ---------------- RJX ---------------- -->
+    <article class="article" id="rjx" aria-labelledby="rjx-h">
+      <header class="article-head">
+        <!--<p class="eyebrow">Project</p>-->
+        <h1 id="rjx-h">rjx<!-- <span class="subtitle">(byteburner)</span>--></h1>
+        <p class="subtitle">A realtime logic circuit simulator in C, with a timeline you can step frame by frame — forwards or backwards.</p>
+      </header>
+
+      <p class="lede">rjx is a realtime logic circuit simulator, inspired by computational redstone. It gives you fine control over the simulation timeline, including the ability to go frame by frame and to run the simulation in reverse. There is a small set of basic components including basic logic gates, button/switch inputs, and several kinds of seven-segment style displays. The GUI is minimal and much of the functionality is accessed through predetermined keybinds.</p>
+
+      <div class="note">
+        <p><strong>Note</strong>: rjx does not simulate real life digital circuits. It should be considered more of an educational or hobbyist application for the exploration of constructing abstract machines from a simple set of logical components.</p>
+      </div>
+
+      <figure class="figure">
+        <img src="imgs/rjx/rjx-main.webp" alt="The rjx simulator: green AND, NOR and NOT gates wired across a dark grid, four cross-coupled latch blocks on the right, a seven-segment display reading b, and a statistics readout in the corner." loading="lazy" />
+        <figcaption>43 components and 106 wires driving a seven-segment display from four cross-coupled NOR latches.<!--The HUD counts ticks, updates and redraws separately.--></figcaption>
+      </figure>
+
+      <!--<h2>Technical challenges</h2>-->
+      <h2>Hash tables in C</h2>
+
+      <!--<h3>Hash tabling</h3>-->
+      <p>The C standard library is limited and lacks support for common data structures like linked lists and binary trees. This necessitates either using a third party library or rolling your own library, and I usually go with the latter, partly as an educational exercise and partly so that I can understand how the library works intuitively and I don't have to decode obscure documentation. In this project, since components can be selected graphically on screen, a hash table was used to quickly map from screen coordinates to the corresponding object in memory. The hash function itself was sourced from the internet more or less verbatim, since deriving a good hash function is mathematically involved and well beyond the scope.</p>
+
+      <p>In memory, hash tables exist as just contiguous blocks of data. For this implementation, they were created as a dynamically allocated struct that was mostly occupied by a buffer of 8-byte words, along with some metadata about the load factor.</p>
+
+      <pre class="code"><code>typedef struct {
+  uint64_t *bfr;
+  int bkts;
+  int entries;
+} hmap_tx;
+
+typedef struct {
+  uint64_t key, val;
+} hmap_entry_tx;</code></pre>
+
+      <p>The bulk of the work was creating a set of routines for accessing the data structure and automating its memory allocation. My personal convention for implementing data structures in C is to create standard constructor and destructor patterns for managing the lifetime of the object, so the responsibility falls on the calling routine to know when the object is no longer needed, although in other respects the process is automated, and destructors can recursively call other destructors to simplify the cleanup process. The library also takes care of resizing the hash table once a certain load factor has been reached and rehashing automatically.</p>
+
+      <pre class="code"><code>static void hmap_init(hmap_tx *h, int bkts) {
+  int bytes = BYTES_PER_BKT * bkts;
+  h-&gt;bfr = malloc(bytes);
+  ...
+}
+
+static void hmap_bfr_destroy(uint64_t *bfr, int bkts) {
+  ...
+  free(bfr);
+}
+
+static void hmap_destroy(hmap_tx *h) {
+  hmap_bfr_destroy(h-&gt;bfr, h-&gt;bkts);
+}</code></pre>
+
+      <p>I opted to use preprocessor macros to allow hash tables to be created as "instances" for individual types. C lacks true generics, but we can use macros as an ugly, if functional, workaround to emulate parametric types. Despite the clunkiness, it's still preferrable to the alternative, which is to create data structures with (void*) pointers that are then casted to various other types, but this is extremely type-unsafe and in my experience leads to painful debugging sessions of trying to pin down the cause of segmentation faults. This can be easily avoided by just initializing a different "instance" of a data structure for each needed type, even if it technically counts as code repetition.</p>
+
+      <h2>Screenshots</h2>
+      <figure class="figure">
+        <img src="imgs/rjx/rjx-1.webp" alt="A dense rjx circuit filling the window with hundreds of green logic gates and wires, a seven-segment display reading 4F, and a statistics panel in the top-left corner." loading="lazy" />
+        <figcaption>A larger build — 442 components, 1,338 wires and 1,614 junctions — running live at 62.5 ticks per second.</figcaption>
+      </figure>
+      <figure class="figure">
+        <img src="imgs/rjx/rjx-2.webp" alt="The same simulator in replay mode, its header bar red instead of green, with replay length and replay position counters added to the statistics panel." loading="lazy" />
+        <figcaption>Replay mode — the header turns red and the HUD gains replay length and position as the simulation is scrubbed backwards through its own history.</figcaption>
+      </figure>
+
+      <h2>Demo</h2>
+      <figure class="figure">
+        <a class="video" href="https://www.youtube.com/watch?v=m-mEatopVb8" target="_blank" rel="noopener noreferrer">
+          <img src="imgs/video/rjx-thumb.jpg" alt="Video thumbnail: the rjx simulator running a green logic circuit on a dark grid." loading="lazy" width="1280" height="720" />
+          <span class="video-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 6.2v11.6l9.2-5.8z"/></svg></span>
+        </a>
+        <figcaption>Demo of rjx &mdash; opens on YouTube in a new tab.</figcaption>
+      </figure>
+    </article>
+
+  </main>
+</div>
+
+<!-- ============ LIGHTBOX ============ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
+  <button class="lightbox-close" type="button" aria-label="Close">&times;</button>
+  <img alt="" />
+  <p class="lightbox-cap"></p>
+</div>
+
+<script src="script.js"></script>
+</body>
 </html>
