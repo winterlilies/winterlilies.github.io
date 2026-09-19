@@ -94,6 +94,17 @@
   --shadow-img: 0 2px 6px rgb(0 0 0 / 0.45), 0 12px 32px rgb(0 0 0 / 0.6);
 }
 
+/* dark theme keeps the plain border — the ring reads as too heavy there */
+:root[data-theme="dark"] .preview-shot:hover,
+:root[data-theme="dark"] .figure > img:hover,
+:root[data-theme="dark"] .video:hover { outline: none; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .preview-shot:hover,
+  :root:not([data-theme="light"]) .figure > img:hover,
+  :root:not([data-theme="light"]) .video:hover { outline: none; }
+}
+
 /* ---------- base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -432,7 +443,12 @@ a:hover { text-decoration-thickness: 2px; }
   cursor: zoom-in;
   transition: border-color var(--speed);
 }
-.figure > img:hover { border-color: var(--accent); }
+.figure > img:hover {
+  border-color: var(--accent);
+  /* light only: see the hover-ring note near the preview rules */
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
 
 .figure figcaption {
   margin-top: 1.15rem;
@@ -475,7 +491,15 @@ a:hover { text-decoration-thickness: 2px; }
   line-height: 0;
   transition: border-color var(--speed);
 }
-.preview-shot:hover { border-color: var(--accent); }
+/* The hover border sits against the screenshot. In dark theme the accent is a
+   light mint and reads fine on its own; in light theme it is a dark olive against
+   a dark thumbnail, so it needs a ring drawn on the page background instead.
+   Outline rather than a thicker border, so hovering never shifts layout. */
+.preview-shot:hover {
+  border-color: var(--accent);
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
 .preview-shot img {
   display: block;
   width: 100%;
@@ -629,7 +653,11 @@ mjx-container[display="true"] { margin: 0 !important; }
   box-shadow: 0 0 0 2px rgb(255 255 255 / 0.85), 0 2px 14px rgb(0 0 0 / 0.45);
   transition: background var(--speed), transform var(--speed);
 }
-.video:hover { border-color: var(--accent); }
+.video:hover {
+  border-color: var(--accent);
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
 .video:hover .video-play svg { background: rgb(0 0 0 / 0.75); transform: scale(1.06); }
 
 /* ---------- spec list (key/value facts) ---------- */
