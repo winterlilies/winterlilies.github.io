@@ -4,12 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>tracy - projects</title>
-<meta name="description" content="Project portfolio: interactive climate mapping, a formal-logic proof trainer, a Fourier transform visualizer, and a realtime logic circuit simulator." />
+<meta name="description" content="Project portfolio: interactive climate mapping, a formal-logic proof trainer, a Fourier transform visualiser, and a realtime logic circuit simulator." />
 <meta name="color-scheme" content="light dark" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23654735'/%3E%3Cpath d='M8 21.5c3.2 0 3.2-11 6.4-11s3.2 11 6.4 11 3.2-11 3.2-11' stroke='%23f2e5bc' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="styles.css" />
 <script>
-  /* apply the stored theme before first paint to avoid a flash of the wrong one */
   try {
     var t = localStorage.getItem('folio-theme');
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
@@ -38,25 +37,18 @@
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
-<body data-view="detail">
+<body data-page="home">
 <a class="skip" href="#main">Skip to content</a>
 
 <div class="shell">
 
   <div class="scrim" data-close-drawer></div>
 
-  <!-- ============ SIDEBAR / MOBILE INDEX ============ -->
   <aside class="sidebar" id="sidebar" tabindex="-1">
     <div class="brand">
       <div class="brand-row">
         <a class="brand-name" href="#home">tracy w</a>
         <div class="brand-actions">
-          <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode">
-          <span class="knob" aria-hidden="true">
-            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.6"/><path d="M12 1.4v2.5M12 20.1v2.5M3.8 3.8l1.8 1.8M18.4 18.4l1.8 1.8M1.4 12h2.5M20.1 12h2.5M3.8 20.2l1.8-1.8M18.4 5.6l1.8-1.8"/></svg>
-            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-          </span>
-        </button>
           <button class="drawer-close" type="button" aria-label="Close menu" data-close-drawer>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg>
           </button>
@@ -91,23 +83,26 @@
         </a></li>
       </ul>
 
-      <p class="nav-label" id="lbl-more">More</p>
-      <ul class="nav-list" aria-labelledby="lbl-more">
+      <p class="nav-label" id="lbl-elsewhere">Elsewhere</p>
+      <ul class="nav-list" aria-labelledby="lbl-elsewhere">
         <!-- Drop resume.pdf next to index.html and uncomment to enable:
         <li><a class="nav-item" href="resume.pdf">
           <span class="nav-title">Résumé<span class="ext-mark">↗</span></span>
           <span class="nav-desc">PDF</span>
         </a></li>
         -->
-        <li><a class="nav-item" href="https://github.com/winterlilies" target="_blank" rel="noopener noreferrer">
+        <li><a class="nav-item nav-item-ext" href="https://x.com/holocatachresis" target="_blank" rel="noopener noreferrer">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           <span class="nav-title">Twitter<span class="ext-mark">↗</span></span>
           <span class="nav-desc">https://x.com/holocatachresis</span>
         </a></li>
-        <li><a class="nav-item" href="https://github.com/winterlilies" target="_blank" rel="noopener noreferrer">
+        <li><a class="nav-item nav-item-ext" href="https://github.com/winterlilies" target="_blank" rel="noopener noreferrer">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
           <span class="nav-title">GitHub<span class="ext-mark">↗</span></span>
           <span class="nav-desc">github.com/winterlilies</span>
         </a></li>
-        <!--<li><a class="nav-item" href="https://www.linkedin.com/in/tracy-wu-50b927375/" target="_blank" rel="noopener noreferrer">
+        <!--<li><a class="nav-item nav-item-ext" href="https://www.linkedin.com/in/tracy-wu-50b927375/" target="_blank" rel="noopener noreferrer">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.76V21h-4v-5.6c0-1.34-.03-3.06-1.9-3.06-1.9 0-2.2 1.46-2.2 2.97V21H9z"/></svg>
           <span class="nav-title">LinkedIn<span class="ext-mark">↗</span></span>
           <span class="nav-desc">linkedin.com/in/tracy-wu</span>
         </a></li>-->
@@ -115,26 +110,29 @@
     </nav>
   </aside>
 
-  <!-- ============ CONTENT ============ -->
   <main class="content" id="main">
 
-    <div class="mobile-bar">
+    <header class="topbar">
       <button class="hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17"/></svg>
       </button>
-      <a class="mobile-title" href="#home">tracy w</a>
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a class="crumb-root" href="#home">home</a>
+        <span class="crumb-sep" aria-hidden="true" hidden>/</span>
+        <span class="crumb-here" hidden></span>
+      </nav>
       <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode">
         <span class="knob" aria-hidden="true">
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.6"/><path d="M12 1.4v2.5M12 20.1v2.5M3.8 3.8l1.8 1.8M18.4 18.4l1.8 1.8M1.4 12h2.5M20.1 12h2.5M3.8 20.2l1.8-1.8M18.4 5.6l1.8-1.8"/></svg>
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         </span>
       </button>
-    </div>
+    </header>
 
-    <!-- ---------------- OVERVIEW (landing) ---------------- -->
     <article class="article" id="home" aria-labelledby="home-h">
       <header class="article-head">
         <!--<p class="eyebrow">about me</p>-->
+        <p class="cover-id"><span class="cover-name">tracy w</span><span class="cover-handle">@holocatachresis</span></p>
         <h1 id="home-h">things i've worked on</h1>
         <!--<p class="subtitle">Systems, signals and symbolic logic &mdash; things that are easier to understand once you can watch them move.</p>-->
       </header>
@@ -178,10 +176,37 @@
         </li>
       </ul>
 
+      <footer class="cover-links">
+        <h2 class="cover-links-label">Elsewhere</h2>
+        <ul class="contact-row">
+          <li><a class="contact-card" href="https://github.com/winterlilies" target="_blank" rel="noopener noreferrer">
+            <svg class="contact-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            <span class="contact-text">
+              <span class="contact-name">GitHub</span>
+              <span class="contact-handle">winterlilies</span>
+            </span>
+          </a></li>
+          <li><a class="contact-card" href="https://x.com/holocatachresis" target="_blank" rel="noopener noreferrer">
+            <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <span class="contact-text">
+              <span class="contact-name">Twitter</span>
+              <span class="contact-handle">@holocatachresis</span>
+            </span>
+          </a></li>
+          <!-- LinkedIn is commented out in the drawer too; uncomment both to bring it back.
+          <li><a class="contact-card" href="https://www.linkedin.com/in/tracy-wu-50b927375/" target="_blank" rel="noopener noreferrer">
+            <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.76V21h-4v-5.6c0-1.34-.03-3.06-1.9-3.06-1.9 0-2.2 1.46-2.2 2.97V21H9z"/></svg>
+            <span class="contact-text">
+              <span class="contact-name">LinkedIn</span>
+              <span class="contact-handle">tracy-wu</span>
+            </span>
+          </a></li>
+          -->
+        </ul>
+      </footer>
+
       <!--<p class="colophon">Typefaces used: Outfit, Red Hat Text, Inconsolata. Math rendered with MathJax.</p>-->
     </article>
-
-    <!-- ---------------- CLIMATE EXPLORER ---------------- -->
     <article class="article" id="climate" aria-labelledby="climate-h">
       <header class="article-head">
         <!--<p class="eyebrow">Project</p>-->
@@ -266,13 +291,19 @@
       <!--<div class="note note-vibe">
         <p><strong>Vibe coded.</strong> The bulk of this codebase was written by an LLM. I chose the data sources, decided the interpolation strategy and the comfortable-days model, made the cartographic and interface calls, and checked the output against the source normals — but I did not type most of the ~4,200 lines of <code>app.js</code>. Flagging it because provenance seems worth stating plainly.</p>
       </div>-->
-    </article>
 
-    <!-- ---------------- PROOF TRAINER ---------------- -->
+      <nav class="pager" aria-label="Project navigation">
+        <a class="pager-home" href="#home">&larr; all projects</a>
+        <a class="pager-next" href="#proof">
+          <span class="pager-label">next project</span>
+          <span class="pager-title">proof trainer</span>
+        </a>
+      </nav>
+    </article>
     <article class="article" id="proof" aria-labelledby="proof-h">
       <header class="article-head">
         <!--<p class="eyebrow">Project</p>-->
-        <h1 id="proof-h">Proof Trainer <span class="subtitle">(made with AI)</span></h1>
+        <h1 id="proof-h">proof trainer <span class="subtitle">(made with AI)</span></h1>
         <p class="subtitle">An in-browser tool for learning formal logic: four proof systems, a Kripke model editor, and a Curry–Howard panel that shows you the program hiding inside your proof.</p>
       </header>
 
@@ -303,7 +334,7 @@
       <!--<p>The part I find most useful when learning is that being stuck is treated as information. If a problem is not provable in the logic you are currently in, the countermodel finder will say so constructively: a truth assignment for classical logic, or a bounded search over small Kripke models — up to four worlds — for intuitionistic.</p>
       <p>The semantics module turns this into its own set of exercises. Model-check problems hand you a fixed model and ask what is forced at the root; model-build problems give you a goal and let you edit a poset of worlds directly, toggling atoms with monotonicity enforced live while a validator and an explainer narrate why the goal does or does not hold at each world.</p>-->
       <p>Showing that a statement is false in classical logic is easy - just find a truth assignment where the statement doesn't hold. On the other hand, to show a statement has no proof in intuitionistic logic, the standard approach is to build a Kripke countermodel, which the app features in its own part of the curriculum with an interactive model builder.</p>
-      <p>Intuitionistic logic is notable for having a "richer" structure than classical logic. For example, in classical logic, a consequence of LEM is that <code>¬¬p ⊢ p</code> holds, meaning irrefutable statements are always provable - this is intuitive enough. In IL, however, it's more complicated - you can find statements, like instances of LEM itself <code>p ∨ ¬p</code>, where you can prove the negation of the negation of the statement, but not the statement itself; i.e., <code>⊢ ¬¬(p ∨ ¬p)</code>, but <code>⊬ p ∨ ¬p</code>.
+      <p>Intuitionistic logic is notable for having a "richer" structure than classical logic. For example, in classical logic, a consequence of LEM is that <code>¬¬p ⊢ p</code> holds, meaning irrefutable statements are always provable - this is intuitive enough. In IL, however, it's more complicated - you can find statements, like instances of LEM itself <code>p ∨ ¬p</code>, where you can prove the negation of the negation of the statement, but not the statement itself; i.e., <code>⊢ ¬¬(p ∨ ¬p)</code>, but <code>⊬ p ∨ ¬p</code>.</p>
 
       <figure class="figure">
         <img src="imgs/proof/proof-kripke.webp" alt="The Kripke model editor showing two circular worlds labelled w0 and w1 joined by an arrow, with an atom chip P unlit under w0 and lit under w1. A live forcing panel reads Goal P or not-P, not forced." loading="lazy" width="1800" height="1050" />
@@ -330,9 +361,15 @@
       <!--<div class="note note-vibe">
         <p><strong>Vibe coded.</strong> As with the Climate Explorer, most of these ~13,700 lines were written by an LLM. What is mine: the choice of systems and how they are ordered pedagogically, the curriculum design and level progression, the decision to make countermodels first-class, and the testing that keeps it honest — the solution-replay suite means every authored problem is verified to be solvable rather than assumed to be.</p>
       </div>-->
-    </article>
 
-    <!-- ---------------- FTVT ---------------- -->
+      <nav class="pager" aria-label="Project navigation">
+        <a class="pager-home" href="#home">&larr; all projects</a>
+        <a class="pager-next" href="#ftvt">
+          <span class="pager-label">next project</span>
+          <span class="pager-title">ftvt</span>
+        </a>
+      </nav>
+    </article>
     <article class="article" id="ftvt" aria-labelledby="ftvt-h">
       <header class="article-head">
         <!--<p class="eyebrow">Project</p>-->
@@ -541,9 +578,15 @@ function cplxDiv(z1, z2) {
       <!-- Add ftvt.html next to index.html and uncomment to offer the live tool:
       <div class="linkrow"><a class="button" href="ftvt.html">» Try ftvt yourself «</a></div>
       -->
-    </article>
 
-    <!-- ---------------- RJX ---------------- -->
+      <nav class="pager" aria-label="Project navigation">
+        <a class="pager-home" href="#home">&larr; all projects</a>
+        <a class="pager-next" href="#rjx">
+          <span class="pager-label">next project</span>
+          <span class="pager-title">rjx</span>
+        </a>
+      </nav>
+    </article>
     <article class="article" id="rjx" aria-labelledby="rjx-h">
       <header class="article-head">
         <!--<p class="eyebrow">Project</p>-->
@@ -617,12 +660,15 @@ static void hmap_destroy(hmap_tx *h) {
         </a>
         <figcaption>Demo of rjx &mdash; opens on YouTube in a new tab.</figcaption>
       </figure>
+
+      <nav class="pager" aria-label="Project navigation">
+        <a class="pager-home" href="#home">&larr; all projects</a>
+      </nav>
     </article>
 
   </main>
 </div>
 
-<!-- ============ LIGHTBOX ============ -->
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
   <button class="lightbox-close" type="button" aria-label="Close">&times;</button>
   <img alt="" />

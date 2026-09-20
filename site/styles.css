@@ -1,6 +1,9 @@
 /* ============================================================
-   Portfolio — Gruvbox Material palette, light + dark
-   Hand-written CSS, no framework, no build step.
+   Portfolio — Gruvbox Material palette, light + dark.
+   One layout for desktop and mobile: a cover page, one essay per
+   project, and the index as a drawer behind the header bar. The
+   only thing that changes with width is that the bar is capped to
+   the content column on wide screens and full-bleed on narrow ones.
    ============================================================ */
 
 /* ---------- fonts (self-hosted variable faces) ---------- */
@@ -152,23 +155,75 @@ a:hover { text-decoration-thickness: 2px; }
    Shell — sidebar + content
    ============================================================ */
 .shell {
-  display: grid;
-  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
-  height: 100vh;
-  height: 100dvh;
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ---------- sidebar ---------- */
 .sidebar {
-  grid-column: 1;
-  background: var(--bg-1);
-  border-right: 1px solid var(--bg-3);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 45;
+  width: min(var(--sidebar-w), 84vw);
   display: flex;
   flex-direction: column;
   padding: 2rem 0 1.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg-1);
+  border-right: 1px solid var(--bg-3);
+  box-shadow: 0 0 2rem rgb(0 0 0 / 0.28);
+  transform: translateX(-100%);
+  visibility: hidden;
+  /* zero-length visibility step, delayed only on the way out, so the panel is
+     focusable the instant it opens but the slide-out stays visible */
+  transition: transform 220ms ease, visibility 0s linear 220ms;
 }
+
+body[data-drawer="open"] .sidebar {
+  transform: none;
+  visibility: visible;
+  transition: transform 220ms ease, visibility 0s linear 0s;
+}
+
+.scrim {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(0 0 0 / 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease, visibility 0s linear 220ms;
+}
+body[data-drawer="open"] .scrim {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 220ms ease, visibility 0s linear 0s;
+}
+
+body[data-drawer="open"] { overflow: hidden; }
+
+/* the close control lives inside the drawer, where it is always reachable */
+.drawer-close {
+  display: grid;
+  place-items: center;
+  /* matches the theme toggle it replaced (--track-h), so the flex brand row
+     keeps the original height and nothing below it shifts down */
+  width: var(--track-h, 1.62rem);
+  height: var(--track-h, 1.62rem);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-dim);
+  cursor: pointer;
+}
+.drawer-close:hover { color: var(--accent); }
+.drawer-close svg { width: 1.15rem; height: 1.15rem; display: block; }
 
 .brand { padding: 0 1.5rem 1.75rem; }
 
@@ -206,9 +261,6 @@ a:hover { text-decoration-thickness: 2px; }
   align-items: center;
   gap: 0.5rem;
 }
-
-/* only reachable inside the open drawer, so mobile-only */
-.drawer-close { display: none; }
 
 /* theme toggle — pill switch; the knob carries the active mode's icon */
 .theme-toggle {
@@ -330,25 +382,137 @@ a:hover { text-decoration-thickness: 2px; }
   vertical-align: 0.15em;
 }
 
+/* The "Elsewhere" links carry their service mark in a leading column, so the
+   drawer reads the same way as the cover's contact cards. The icon spans both
+   text rows and centres against them; items without one (a résumé link, say)
+   keep the plain block layout and stay flush with the project titles. */
+.nav-item-ext {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.6rem;
+}
+.nav-item-ext .nav-icon {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  align-self: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--muted);
+}
+.nav-item-ext .nav-title { grid-column: 2; grid-row: 1; }
+.nav-item-ext .nav-desc { grid-column: 2; grid-row: 2; }
+.nav-item-ext:hover .nav-icon { color: inherit; }
 
-/* ---------- content ---------- */
-.content {
-  grid-column: 2;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scroll-behavior: smooth;
+/* ---------- header bar (sticky; capped to the content column) ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0.7rem 2.5rem;
+  background: color-mix(in srgb, var(--bg-0) 88%, transparent);
+  backdrop-filter: blur(10px);
 }
 
+/* the rule is inset by the bar's own padding so it lines up with the text
+   column rather than the full padded box; below the content measure the bar
+   runs edge to edge and so does the rule (see the 44rem block at the end) */
+.topbar::after {
+  content: "";
+  position: absolute;
+  left: 2.5rem;
+  right: 2.5rem;
+  bottom: 0;
+  height: 1px;
+  background: var(--bg-3);
+}
+
+.hamburger {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  margin-left: -0.45rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-dim);
+  cursor: pointer;
+}
+.hamburger:hover { color: var(--accent); }
+.hamburger svg { width: 1.3rem; height: 1.3rem; display: block; }
+
+/* Breadcrumb: says where you are and doubles as the way back to the cover,
+   so no separate "back to overview" control is needed. The tail is filled in
+   by the router; the markup ships with it hidden, which is also the no-JS
+   state and the correct state on the cover itself. */
+.crumbs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.crumbs [hidden] { display: none; }
+
+.crumb-root {
+  flex: none;
+  font-weight: 500;
+  color: var(--fg-dim);
+  text-decoration: none;
+}
+.crumb-root:hover { color: var(--accent); }
+
+.crumb-sep {
+  flex: none;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+/* the tail is the part that gives when the bar runs out of room */
+.crumb-here {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+/* on the cover the root *is* the current page, so it stops advertising
+   itself as somewhere else to go */
+body[data-page="home"] .crumb-root {
+  font-weight: 600;
+  color: var(--fg);
+  cursor: default;
+}
+body[data-page="home"] .crumb-root:hover { color: var(--fg); }
+
+/* ---------- content ---------- */
 .article {
   display: none;
   max-width: var(--measure);
   margin: 0 auto;
   padding: 4rem 2.5rem 7rem;
+  /* The article ids double as route names, so on a cold load the browser tries
+     to scroll the named article to the top of the viewport — which lands it
+     under the sticky bar — before the router has had a chance to reset. A
+     scroll margin taller than the viewport makes that target position negative,
+     so the UA clamps it to the top and the race cannot happen at all. */
+  scroll-margin-top: 100vh;
 }
 .article.is-active { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
-  .content { scroll-behavior: auto; }
   * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
 
@@ -585,6 +749,150 @@ a:hover { text-decoration-thickness: 2px; }
   .preview { grid-template-columns: 6.75rem minmax(0, 1fr); column-gap: 0.75rem; }
 }
 
+/* ---------- the cover ---------- */
+#home { padding-top: 3rem; }
+
+#home h1 {
+  font-size: clamp(2.6rem, 1.6rem + 3.6vw, 4.1rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.5rem;
+}
+
+/* opening statement, at the article's own width */
+#home .lede {
+  font-size: clamp(1.12rem, 1.02rem + 0.4vw, 1.3rem);
+  line-height: 1.55;
+  color: var(--fg);
+}
+
+#home .article-head { margin-bottom: 2rem; }
+
+/* the name is the cover's own byline now that the header bar carries the
+   breadcrumb instead */
+#home .cover-id {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.7rem;
+  margin: 0 0 0.9rem;
+}
+.cover-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--fg);
+}
+.cover-handle {
+  font-size: 0.92rem;
+  color: var(--fg-dim);
+}
+
+/* the cover is the project list, so the heading above it is a quiet label */
+#home > h2,
+#home .cover-links-label {
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: var(--font-display);
+  border-bottom: 0;
+  margin: 3.25rem 0 0;
+  padding: 0;
+}
+
+/* ---------- "elsewhere": contact links, cover only ---------- */
+/* these used to be a site-wide footer; on a project page the pager is the
+   only thing that belongs at the bottom, so they moved onto the cover */
+#home .contact-row {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 1.1rem 0 0;
+  padding: 0;
+}
+#home .contact-row > li { margin: 0; }
+
+#home .contact-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.9rem 0.55rem;
+  border: 1px solid var(--bg-3);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+  color: var(--fg-dim);
+  text-decoration: none;
+  transition: border-color var(--speed), color var(--speed);
+}
+#home .contact-card:hover { border-color: var(--accent); color: var(--accent); }
+
+.contact-icon { flex: none; width: 1.15rem; height: 1.15rem; display: block; }
+
+.contact-text { display: grid; }
+.contact-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--fg);
+}
+#home .contact-card:hover .contact-name { color: var(--accent); }
+.contact-handle {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* ---------- foot-of-page sequence ---------- */
+.pager {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 4.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--bg-3);
+}
+
+.pager-home {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--fg-dim);
+  text-decoration: none;
+  padding-bottom: 0.2rem;
+}
+.pager-home:hover { color: var(--accent); }
+
+.pager-next {
+  text-align: right;
+  text-decoration: none;
+  color: var(--fg);
+  display: grid;
+  gap: 0.15rem;
+}
+.pager-label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pager-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.pager-next:hover .pager-title { color: var(--accent); }
+.pager-next .pager-title::after { content: " \2192"; color: var(--muted); }
+.pager-next:hover .pager-title::after { color: var(--accent); }
+
 /* ---------- code ---------- */
 .code {
   margin: 1.5rem 0;
@@ -713,14 +1021,6 @@ mjx-container[display="true"] { margin: 0 !important; }
 }
 
 /* ============================================================
-   Mobile bar (hidden on desktop)
-   ============================================================ */
-.mobile-bar { display: none; }
-
-/* scrim is mobile-only (see the drawer block below) */
-.scrim { display: none; }
-
-/* ============================================================
    Lightbox
    ============================================================ */
 .lightbox {
@@ -770,121 +1070,8 @@ mjx-container[display="true"] { margin: 0 !important; }
   color: var(--fg-dim);
 }
 
-/* ============================================================
-   MOBILE  —  slide-out drawer over the content
-   ============================================================ */
+/* ---------- narrow screens ---------- */
 @media (max-width: 900px) {
-  .shell {
-    display: block;
-    height: auto;
-    min-height: 100vh;
-    min-height: 100dvh;
-  }
-
-  /* the sidebar keeps its desktop formatting and becomes an off-canvas drawer */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 45;
-    width: min(19rem, 84vw);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    box-shadow: 0 0 2rem rgb(0 0 0 / 0.28);
-    transform: translateX(-100%);
-    visibility: hidden;
-    /* visibility flips as a zero-length step, delayed only on the way out, so the
-       slide-out stays visible while the panel is focusable the instant it opens */
-    transition: transform 220ms ease, visibility 0s linear 220ms;
-  }
-  body[data-drawer="open"] .sidebar {
-    transform: none;
-    visibility: visible;
-    transition: transform 220ms ease, visibility 0s linear 0s;
-  }
-
-  /* scrim behind the open drawer */
-  .scrim {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 40;
-    background: rgb(0 0 0 / 0.45);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 220ms ease, visibility 0s linear 220ms;
-  }
-  body[data-drawer="open"] .scrim {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 220ms ease, visibility 0s linear 0s;
-  }
-
-  /* content is always on screen now */
-  .content { overflow: visible; }
-  body[data-drawer="open"] { overflow: hidden; }
-
-  .mobile-bar {
-    display: flex;
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    align-items: center;
-    gap: 0.85rem;
-    padding: 0.6rem 1.25rem;
-    background: color-mix(in srgb, var(--bg-0) 92%, transparent);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--bg-3);
-  }
-
-  .hamburger {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 2.1rem;
-    height: 2.1rem;
-    margin-left: -0.35rem;
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--fg-dim);
-    cursor: pointer;
-  }
-  .hamburger:hover { color: var(--accent); }
-  .hamburger svg { width: 1.3rem; height: 1.3rem; display: block; }
-
-  .drawer-close {
-    display: grid;
-    place-items: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--fg-dim);
-    cursor: pointer;
-  }
-  .drawer-close:hover { color: var(--accent); }
-  .drawer-close svg { width: 1.15rem; height: 1.15rem; display: block; }
-
-  .mobile-title {
-    flex: 1;
-    min-width: 0;
-    font-family: var(--font-display);
-    font-size: 1.02rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--fg);
-    text-decoration: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .mobile-title:hover { color: var(--accent); }
-
   .article { padding: 2rem 1.25rem 5rem; }
   .article h2 { margin-top: 2.5rem; }
 
@@ -898,8 +1085,13 @@ mjx-container[display="true"] { margin: 0 !important; }
   .lightbox img { max-width: none; max-height: none; border-radius: 0; }
   .lightbox-close { position: fixed; }
   .lightbox-cap { position: fixed; }
-}
 
+  .topbar { padding: 0.65rem 1.25rem; }
+  .topbar::after { left: 1.25rem; right: 1.25rem; }
+  #home { padding-top: 1.75rem; }
+  .pager { margin-top: 3rem; }
+  .pager-title { font-size: 1.15rem; }
+}
 
 @media (max-width: 480px) {
   body { font-size: 0.97rem; }
@@ -907,6 +1099,15 @@ mjx-container[display="true"] { margin: 0 !important; }
   .nav-list { padding: 0 1rem; }
   .brand { padding: 0 1rem 1.75rem; }
   .nav-label { padding: 0 1rem; }
+
+  .topbar { padding: 0.65rem 1rem; }
+  .topbar::after { left: 1rem; right: 1rem; }
+}
+
+/* Below the content measure the header bar itself runs edge to edge, so its
+   rule does too; above it, the rule stays inset to the text column. */
+@media (max-width: 44rem) {
+  .topbar::after { left: 0; right: 0; }
 }
 
 /* wider screens: a slightly longer line; figures stay at the content width */

@@ -1,6 +1,7 @@
 /* ============================================================
-   Portfolio behaviour: theme, hash router, lightbox, MathJax.
-   Plain ES5-ish so it runs straight off file:// with no build.
+   Portfolio behaviour: theme, drawer, hash router, breadcrumb,
+   lightbox, MathJax. The nav is a drawer at every width, so the header
+   bar carries a breadcrumb rather than a persistent sidebar.
    ============================================================ */
 (function () {
   'use strict';
@@ -11,62 +12,50 @@
 
   var root = document.documentElement;
   var body = document.body;
-  var content = document.getElementById('main');
-  var mqMobile = window.matchMedia('(max-width: 900px)');
   var mqDark = window.matchMedia('(prefers-color-scheme: dark)');
 
   /* ---------------- theme ---------------- */
-  /* (an inline script in <head> applies the stored theme early to avoid a flash) */
+  var toggles = Array.prototype.slice.call(document.querySelectorAll('.theme-toggle'));
 
   function currentTheme() {
     return root.getAttribute('data-theme') || (mqDark.matches ? 'dark' : 'light');
   }
-
-  var toggles = Array.prototype.slice.call(document.querySelectorAll('.theme-toggle'));
-
   function syncToggles() {
     var isDark = currentTheme() === 'dark';
-    toggles.forEach(function (btn) {
-      btn.setAttribute('aria-checked', isDark ? 'true' : 'false');
-    });
+    toggles.forEach(function (b) { b.setAttribute('aria-checked', isDark ? 'true' : 'false'); });
   }
-
   function setTheme(theme) {
     root.setAttribute('data-theme', theme);
     try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* private mode */ }
     syncToggles();
   }
-
-  toggles.forEach(function (btn) {
-    btn.addEventListener('click', function () {
+  toggles.forEach(function (b) {
+    b.addEventListener('click', function () {
       setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
     });
   });
-
-  /* follow the OS while the visitor hasn't picked a side */
   function onSystemThemeChange() { if (!root.getAttribute('data-theme')) syncToggles(); }
   if (mqDark.addEventListener) mqDark.addEventListener('change', onSystemThemeChange);
   else if (mqDark.addListener) mqDark.addListener(onSystemThemeChange);
-
   syncToggles();
 
-  /* ---------------- MathJax (typeset each article the first time it is shown) ---- */
-
+  /* ---------------- MathJax (typeset each article the first time it shows) ---- */
   function typeset(el) {
     if (!el || !window.MathJax || !window.MathJax.typesetPromise) return;
     if (el.getAttribute('data-typeset') === 'done') return;
     el.setAttribute('data-typeset', 'done');
-    window.MathJax.typesetPromise([el])['catch'](function () { /* offline: leave the TeX as-is */ });
+    window.MathJax.typesetPromise([el])['catch'](function () { /* offline: leave the TeX */ });
   }
-
   window.__typesetActive = function () {
     typeset(document.querySelector('.article.is-active'));
   };
 
-  /* ---------------- mobile drawer ---------------- */
+  /* ---------------- drawer (all widths) ---------------- */
 
+  var content = document.getElementById('main');
   var sidebar = document.getElementById('sidebar');
   var hamburgers = Array.prototype.slice.call(document.querySelectorAll('.hamburger'));
+  var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
   var drawerOpen = false;
   var preDrawerFocus = null;
 
@@ -78,15 +67,11 @@
       b.setAttribute('aria-expanded', open ? 'true' : 'false');
       b.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     });
-    /* keep tab order out of the content sitting behind the drawer */
+    /* keep tab order out of the page behind the drawer */
     if (content && 'inert' in HTMLElement.prototype) content.inert = open;
-
     if (open) {
       preDrawerFocus = document.activeElement;
-      /* wait a frame: the panel is visibility:hidden until the attribute lands */
-      requestAnimationFrame(function () {
-        if (sidebar && sidebar.focus) sidebar.focus();
-      });
+      requestAnimationFrame(function () { if (sidebar && sidebar.focus) sidebar.focus(); });
     } else if (preDrawerFocus && preDrawerFocus.focus) {
       preDrawerFocus.focus();
       preDrawerFocus = null;
@@ -97,40 +82,47 @@
   hamburgers.forEach(function (b) {
     b.addEventListener('click', function () { setDrawer(!drawerOpen); });
   });
-
   Array.prototype.forEach.call(document.querySelectorAll('[data-close-drawer]'), function (el) {
     el.addEventListener('click', closeDrawer);
   });
 
-  /* a drawer left open while resizing up to desktop would trap scroll */
-  function onBreakpoint() { if (!mqMobile.matches) closeDrawer(); }
-  if (mqMobile.addEventListener) mqMobile.addEventListener('change', onBreakpoint);
-  else if (mqMobile.addListener) mqMobile.addListener(onBreakpoint);
-
   body.setAttribute('data-drawer', 'closed');
 
-  /* ---------------- router ---------------- */
+  /* ---------------- breadcrumb ---------------- */
+  /* The tail is read off the cover's own project titles, so it always says
+     whatever those cards say — no second list of names to keep in sync. */
+  var crumbRoot = document.querySelector('.crumb-root');
+  var crumbSep = document.querySelector('.crumb-sep');
+  var crumbHere = document.querySelector('.crumb-here');
+  var TITLES = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.preview-title a[href^="#"]'), function (a) {
+    TITLES[a.getAttribute('href').slice(1)] = (a.textContent || '').trim();
+  });
 
-  /* The hash is a router target, not an anchor, but the browser doesn't know that:
-     on a fresh load of `index.html#climate` it scrolls that element to the top of
-     the viewport, which on mobile tucks the article header under the sticky bar.
-     route() runs while the document is still parsing, so its reset happens before
-     that scroll — hence a second, one-shot reset once loading is done. */
-  function resetScroll() {
-    if (content) content.scrollTop = 0;
-    window.scrollTo(0, 0);
+  function setCrumb(target) {
+    if (!crumbRoot) return;
+    var here = (target === DEFAULT_ARTICLE) ? '' : (TITLES[target] || '');
+    if (crumbHere) {
+      crumbHere.textContent = here;
+      crumbHere.hidden = !here;
+      if (here) crumbHere.setAttribute('aria-current', 'page');
+      else crumbHere.removeAttribute('aria-current');
+    }
+    if (crumbSep) crumbSep.hidden = !here;
+    if (here) crumbRoot.removeAttribute('aria-current');
+    else crumbRoot.setAttribute('aria-current', 'page');
   }
 
-  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  /* ---------------- router ---------------- */
+  function resetScroll() { window.scrollTo(0, 0); }
 
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   if (document.readyState !== 'complete') {
     window.addEventListener('load', function once() {
       window.removeEventListener('load', once);
       resetScroll();
     });
   }
-
-  var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
 
   function hashId() {
     var h = (location.hash || '').replace(/^#/, '');
@@ -141,6 +133,9 @@
     var target = hashId() || DEFAULT_ARTICLE;
 
     closeDrawer();
+    /* drives the cover-vs-project chrome in CSS */
+    body.setAttribute('data-page', target);
+    setCrumb(target);
 
     ARTICLES.forEach(function (name) {
       var el = document.getElementById(name);
@@ -150,10 +145,10 @@
       if (on) typeset(el);
     });
 
+    /* highlight the current entry in the drawer */
     navItems.forEach(function (link) {
       var href = link.getAttribute('href') || '';
-      var isMatch = href.charAt(0) === '#' && href.slice(1) === target;
-      if (isMatch) link.setAttribute('aria-current', 'page');
+      if (href.charAt(0) === '#' && href.slice(1) === target) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
 
@@ -162,16 +157,14 @@
 
   window.addEventListener('hashchange', route);
 
-  /* re-clicking the active item should still navigate (no hashchange fires) */
-  navItems.forEach(function (link) {
-    link.addEventListener('click', function () {
-      var href = link.getAttribute('href') || '';
-      if (href.charAt(0) === '#' && href === location.hash) route();
+  /* re-clicking the current target should still navigate (no hashchange fires) */
+  Array.prototype.forEach.call(document.querySelectorAll('a[href^="#"]'), function (a) {
+    a.addEventListener('click', function () {
+      if (a.getAttribute('href') === location.hash) route();
     });
   });
 
   /* ---------------- lightbox ---------------- */
-
   var lb = document.getElementById('lightbox');
   var lbImg = lb.querySelector('img');
   var lbCap = lb.querySelector('.lightbox-cap');
@@ -188,7 +181,6 @@
     lb.classList.add('is-open');
     lbClose.focus();
   }
-
   function closeLightbox() {
     if (!lb.classList.contains('is-open')) return;
     lb.classList.remove('is-open');
@@ -196,7 +188,6 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
-  /* make figure images behave like buttons */
   Array.prototype.forEach.call(document.querySelectorAll('.figure > img'), function (img) {
     img.setAttribute('tabindex', '0');
     img.setAttribute('role', 'button');
@@ -212,7 +203,6 @@
       closeLightbox();
     }
   });
-
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
     if (lb.classList.contains('is-open')) closeLightbox();
