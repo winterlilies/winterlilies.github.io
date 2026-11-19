@@ -465,13 +465,35 @@ body[data-drawer="open"] { overflow: hidden; }
 }
 .crumbs [hidden] { display: none; }
 
+/* the root is the site's byline: name, then handle, on every page */
 .crumb-root {
   flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.6rem;
   font-weight: 500;
   color: var(--fg-dim);
   text-decoration: none;
 }
 .crumb-root:hover { color: var(--accent); }
+
+.crumb-name { letter-spacing: -0.015em; }
+
+/* the handle stays quiet even while the root link is hovered */
+.crumb-handle,
+.crumb-root:hover .crumb-handle {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+/* on a phone the bar can't fit name, handle and a project title, so the
+   handle steps aside whenever there is a tail to show */
+@media (max-width: 619px) {
+  body:not([data-page="home"]) .crumb-handle { display: none; }
+}
 
 .crumb-sep {
   flex: none;
@@ -625,7 +647,6 @@ body[data-page="home"] .crumb-root:hover { color: var(--fg); }
    so the four cards tend to land above the fold without anything being pinned
    to the viewport height */
 #home { padding-top: 2.75rem; padding-bottom: 3rem; }
-#home .article-head { margin-bottom: 1.75rem; }
 #home h2 { margin-top: 2rem; }
 #home .colophon { margin-top: 2.25rem; }
 
@@ -683,7 +704,10 @@ body[data-page="home"] .crumb-root:hover { color: var(--fg); }
   font-size: 1.15rem;
   font-weight: 600;
 }
+/* block, so the link fills the title's whole row: the card's hover effect
+   covers that row, and anywhere that lights up should also be clickable */
 .article .preview-title a {
+  display: block;
   color: var(--fg);
   text-decoration: none;
 }
@@ -694,6 +718,52 @@ body[data-page="home"] .crumb-root:hover { color: var(--fg); }
   font-size: 0.92rem;
   line-height: 1.55;
   color: var(--fg-dim);
+}
+
+/* Minimal cover: with a real pointer and room for two columns, the description
+   leaves the flow and sits over the screenshot, revealed (with a tint) while the
+   card is hovered or focused. The shot and the description share one grid cell
+   so the overlay always matches the image exactly. Touch screens never get
+   hover, so they keep the visible description from the rules above/below. */
+@media (min-width: 620px) and (hover: hover) {
+  .preview {
+    display: grid;
+    grid-template-rows: auto auto;
+  }
+  .preview-shot { grid-area: 1 / 1; }
+  .article .preview-title { grid-area: 2 / 1; }
+
+  /* .article-scoped to outrank `.article p`, whose bottom margin otherwise
+     lifts the overlay off the bottom of the shot */
+  .article .preview-desc {
+    grid-area: 1 / 1;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* inset by the shot's 1px border so the tint never dims the hover border */
+    margin: 1px;
+    padding: 1rem 1.5rem;
+    border-radius: calc(var(--radius) - 1px);
+    background: rgb(20 14 9 / 0.72);
+    /* fixed light ink: the tint is dark in both themes */
+    color: #f2e6cf;
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    line-height: 1.45;
+    text-align: center;
+    text-wrap: balance;
+    opacity: 0;
+    /* clicks fall through to the screenshot link underneath */
+    pointer-events: none;
+    transition: opacity var(--speed) ease;
+  }
+  .article .preview:hover .preview-desc,
+  .article .preview:focus-within .preview-desc { opacity: 1; }
+
+  /* hovering the title lights up the shot's border too, so the card reads as one */
+  .preview:hover .preview-shot { border-color: var(--accent); }
+  .preview:hover .preview-title a { color: var(--accent); }
 }
 
 /* On a phone the stacked cards are ~330px tall, so barely one lands above the
@@ -707,7 +777,9 @@ body[data-page="home"] .crumb-root:hover { color: var(--fg); }
     position: relative;
     display: grid;
     grid-template-columns: 8rem minmax(0, 1fr);
-    grid-template-rows: auto auto;
+    /* the description row soaks up the thumbnail's extra height, so a short
+       description sits right under its title instead of drifting down */
+    grid-template-rows: auto 1fr;
     column-gap: 0.9rem;
     align-items: start;
   }
@@ -741,7 +813,6 @@ body[data-page="home"] .crumb-root:hover { color: var(--fg); }
 
   /* the overview's intro eats the fold on a phone; tighten what surrounds it */
   #home { padding-top: 1.5rem; }
-  #home .article-head { margin-bottom: 1.25rem; }
   #home h2 { margin-top: 1.5rem; }
 }
 
@@ -753,8 +824,8 @@ body[data-page="home"] .crumb-root:hover { color: var(--fg); }
 #home { padding-top: 3rem; }
 
 #home h1 {
-  font-size: clamp(2.6rem, 1.6rem + 3.6vw, 4.1rem);
-  line-height: 1.02;
+  font-size: clamp(2.1rem, 1.35rem + 2.6vw, 3.1rem);
+  line-height: 1.05;
   letter-spacing: -0.03em;
   margin-bottom: 1.5rem;
 }
@@ -766,86 +837,47 @@ body[data-page="home"] .crumb-root:hover { color: var(--fg); }
   color: var(--fg);
 }
 
-#home .article-head { margin-bottom: 2rem; }
-
-/* the name is the cover's own byline now that the header bar carries the
-   breadcrumb instead */
-#home .cover-id {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.15rem 0.7rem;
-  margin: 0 0 0.9rem;
-}
-.cover-name {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--fg);
-}
-.cover-handle {
-  font-size: 0.92rem;
-  color: var(--fg-dim);
+/* the h1's own margin and the grid's top margin collapse into this one,
+   so this is the whole gap between the heading and the first card */
+#home .article-head { margin-bottom: 2.75rem; }
+@media (max-width: 619px) {
+  #home .article-head { margin-bottom: 2.25rem; }
 }
 
-/* the cover is the project list, so the heading above it is a quiet label */
-#home > h2,
-#home .cover-links-label {
-  font-size: 0.73rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-family: var(--font-display);
-  border-bottom: 0;
-  margin: 3.25rem 0 0;
-  padding: 0;
-}
-
-/* ---------- "elsewhere": contact links, cover only ---------- */
+/* ---------- contact links, cover only ---------- */
 /* these used to be a site-wide footer; on a project page the pager is the
-   only thing that belongs at the bottom, so they moved onto the cover */
+   only thing that belongs at the bottom, so they moved onto the cover. Bare
+   icons, centred under the grid; the names live in aria-label/title. */
+/* the icons' own 0.75rem tap padding and the last card's 0.4rem li margin
+   already add space, so this margin stays small */
+#home .cover-links { margin-top: 2rem; }
+@media (max-width: 619px) {
+  #home .cover-links { margin-top: 1.25rem; }
+}
+
 #home .contact-row {
   list-style: none;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-  margin: 1.1rem 0 0;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
   padding: 0;
 }
 #home .contact-row > li { margin: 0; }
 
+/* padding keeps a comfortable ~2.75rem tap target around a small glyph */
 #home .contact-card {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.5rem 0.9rem 0.55rem;
-  border: 1px solid var(--bg-3);
+  display: block;
+  padding: 0.75rem;
   border-radius: var(--radius);
-  background: var(--bg-1);
   color: var(--fg-dim);
-  text-decoration: none;
-  transition: border-color var(--speed), color var(--speed);
+  line-height: 0;
+  transition: color var(--speed);
 }
-#home .contact-card:hover { border-color: var(--accent); color: var(--accent); }
+#home .contact-card:hover,
+#home .contact-card:focus-visible { color: var(--accent); }
 
-.contact-icon { flex: none; width: 1.15rem; height: 1.15rem; display: block; }
-
-.contact-text { display: grid; }
-.contact-name {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--fg);
-}
-#home .contact-card:hover .contact-name { color: var(--accent); }
-.contact-handle {
-  font-size: 0.78rem;
-  line-height: 1.4;
-  color: var(--muted);
-}
+.contact-icon { width: 1.3rem; height: 1.3rem; display: block; }
 
 /* ---------- foot-of-page sequence ---------- */
 .pager {
